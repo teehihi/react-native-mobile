@@ -1,18 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Image,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { PersonalInfo, Skill } from '../types/profile';
+import { User } from '../types/api';
+import { ApiService } from '../services/api';
+import { NavigationProps } from '../types/navigation';
 
-const HomepageScreen: React.FC = () => {
+interface HomepageScreenProps extends NavigationProps {}
+
+const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      const user = await ApiService.getCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      console.log('Error loading user data:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Đăng xuất',
+      'Bạn có chắc chắn muốn đăng xuất?',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Đăng xuất',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await ApiService.logout();
+              navigation.replace('Welcome');
+            } catch (error) {
+              console.log('Logout error:', error);
+              navigation.replace('Welcome');
+            }
+          },
+        },
+      ]
+    );
+  };
   // Personal information data
   const personalInfo: PersonalInfo = {
-    name: 'Nguyễn Nhật Thiên',
+    name: currentUser?.fullName || 'Người dùng',
     age: 20,
     occupation: 'Sinh viên IT',
     school: 'ĐH Công nghệ Kỹ thuật TP.HCM',
@@ -67,8 +111,11 @@ const HomepageScreen: React.FC = () => {
         <View style={styles.headerInfo}>
           <Text style={styles.name}>{personalInfo.name}</Text>
           <Text style={styles.title}>{personalInfo.occupation}</Text>
-          <Text style={styles.subtitle}>{personalInfo.school}</Text>
+          <Text style={styles.subtitle}>{currentUser?.email || 'user@example.com'}</Text>
         </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <FontAwesome name="sign-out" size={20} color="#ffffff" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
@@ -82,24 +129,26 @@ const HomepageScreen: React.FC = () => {
           </View>
           
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Họ và tên:</Text>
-            <Text style={styles.value}>{personalInfo.name}</Text>
+            <Text style={styles.label}>Username:</Text>
+            <Text style={styles.value}>{currentUser?.username || 'N/A'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Tuổi:</Text>
-            <Text style={styles.value}>{personalInfo.age} tuổi</Text>
+            <Text style={styles.label}>Email:</Text>
+            <Text style={styles.value}>{currentUser?.email || 'N/A'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Nghề nghiệp:</Text>
-            <Text style={styles.value}>{personalInfo.occupation}</Text>
+            <Text style={styles.label}>Số điện thoại:</Text>
+            <Text style={styles.value}>{currentUser?.phoneNumber || 'Chưa cập nhật'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Trường:</Text>
-            <Text style={styles.value}>{personalInfo.school}</Text>
+            <Text style={styles.label}>Vai trò:</Text>
+            <Text style={styles.value}>{currentUser?.role || 'USER'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Chuyên ngành:</Text>
-            <Text style={styles.value}>{personalInfo.major}</Text>
+            <Text style={styles.label}>Trạng thái:</Text>
+            <Text style={[styles.value, { color: currentUser?.isActive ? '#27ae60' : '#e74c3c' }]}>
+              {currentUser?.isActive ? 'Hoạt động' : 'Không hoạt động'}
+            </Text>
           </View>
         </View>
 
@@ -215,6 +264,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#ffffff',
     opacity: 0.8,
+  },
+  logoutButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   content: {
     padding: 20,

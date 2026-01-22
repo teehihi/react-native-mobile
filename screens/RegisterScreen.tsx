@@ -1,0 +1,354 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { NavigationProps } from '../types/navigation';
+import { ApiService } from '../services/api';
+import { theme } from '../constants/theme';
+
+interface RegisterScreenProps extends NavigationProps {}
+
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: '',
+    phoneNumber: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const validateForm = () => {
+    const { username, email, password, confirmPassword, fullName } = formData;
+
+    if (!username.trim() || !email.trim() || !password.trim() || !fullName.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin bắt buộc');
+      return false;
+    }
+
+    if (!email.includes('@')) {
+      Alert.alert('Lỗi', 'Email không hợp lệ');
+      return false;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return false;
+    }
+
+    if (username.length < 3) {
+      Alert.alert('Lỗi', 'Tên đăng nhập phải có ít nhất 3 ký tự');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleRegister = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const { confirmPassword, ...registerData } = formData;
+      const response = await ApiService.register({
+        ...registerData,
+        username: registerData.username.trim(),
+        email: registerData.email.trim(),
+        fullName: registerData.fullName.trim(),
+        phoneNumber: registerData.phoneNumber.trim() || undefined,
+      });
+      
+      if (response.success) {
+        Alert.alert(
+          'Thành công', 
+          'Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.',
+          [
+            { text: 'OK', onPress: () => navigation.navigate('Login') }
+          ]
+        );
+      } else {
+        Alert.alert('Lỗi', response.message || 'Đăng ký thất bại');
+      }
+    } catch (error) {
+      Alert.alert('Lỗi', 'Có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Back button */}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <FontAwesome name="arrow-left" size={20} color={theme.colors.primary} />
+        </TouchableOpacity>
+
+        <View style={styles.header}>
+          <FontAwesome name="user-plus" size={80} color={theme.colors.primary} />
+          <Text style={styles.title}>Đăng Ký</Text>
+          <Text style={styles.subtitle}>Tạo tài khoản mới</Text>
+        </View>
+
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <FontAwesome name="user" size={20} color={theme.colors.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Tên đăng nhập *"
+              value={formData.username}
+              onChangeText={(value) => handleInputChange('username', value)}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <FontAwesome name="id-card" size={20} color={theme.colors.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Họ và tên *"
+              value={formData.fullName}
+              onChangeText={(value) => handleInputChange('fullName', value)}
+              autoCapitalize="words"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <FontAwesome name="envelope" size={20} color={theme.colors.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email *"
+              value={formData.email}
+              onChangeText={(value) => handleInputChange('email', value)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <FontAwesome name="phone" size={20} color={theme.colors.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Số điện thoại"
+              value={formData.phoneNumber}
+              onChangeText={(value) => handleInputChange('phoneNumber', value)}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <FontAwesome name="lock" size={20} color={theme.colors.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Mật khẩu *"
+              value={formData.password}
+              onChangeText={(value) => handleInputChange('password', value)}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <FontAwesome 
+                name={showPassword ? "eye" : "eye-slash"} 
+                size={20} 
+                color={theme.colors.gray} 
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <FontAwesome name="lock" size={20} color={theme.colors.gray} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Xác nhận mật khẩu *"
+              value={formData.confirmPassword}
+              onChangeText={(value) => handleInputChange('confirmPassword', value)}
+              secureTextEntry={!showConfirmPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <FontAwesome 
+                name={showConfirmPassword ? "eye" : "eye-slash"} 
+                size={20} 
+                color={theme.colors.gray} 
+              />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity 
+            style={[styles.registerButton, loading && styles.disabledButton]} 
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.registerButtonText}>Đăng Ký</Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Đã có tài khoản? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.loginLink}>Đăng nhập ngay</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
+    paddingTop: 60,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: theme.colors.gray,
+    textAlign: 'center',
+  },
+  form: {
+    width: '100%',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: theme.colors.text,
+  },
+  eyeIcon: {
+    padding: 4,
+  },
+  registerButton: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  registerButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+  loginText: {
+    fontSize: 16,
+    color: theme.colors.gray,
+  },
+  loginLink: {
+    fontSize: 16,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+  },
+});
+
+export default RegisterScreen;

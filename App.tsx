@@ -4,6 +4,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 
 import IntroScreen from './screens/IntroScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
 import HomepageScreen from './screens/HomepageScreen';
 import { RootStackParamList } from './types/navigation';
 
@@ -21,6 +24,9 @@ export default function App(): React.JSX.Element {
         }}
       >
         <Stack.Screen name="Intro" component={IntroScreen} />
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Homepage" component={HomepageScreen} />
       </Stack.Navigator>
     </NavigationContainer>

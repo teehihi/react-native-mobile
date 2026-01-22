@@ -8,13 +8,14 @@ export const COLORS = {
   
   white: '#ffffff',
   black: '#000000',
-  gray: '#ecf0f1',
-  darkGray: '#7f8c8d',
+  gray: '#7f8c8d',
+  darkGray: '#95a5a6',
   lightGray: '#f8f9fa',
   
   text: '#2c3e50',
   textSecondary: '#34495e',
   textLight: '#7f8c8d',
+  background: '#f5f7fa',
 } as const;
 
 export const SIZES = {
@@ -45,3 +46,10 @@ export const FONTS = {
   body3: { fontSize: SIZES.body3, fontWeight: 'normal' as const },
   caption: { fontSize: SIZES.caption, fontWeight: 'normal' as const },
 } as const;
+
+// Export theme object with colors property for compatibility
+export const theme = {
+  colors: COLORS,
+  sizes: SIZES,
+  fonts: FONTS,
+};

@@ -32,9 +32,9 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ navigation }) => {
       useNativeDriver: false,
     }).start();
 
-    // Navigate to Homepage after 10 seconds
+    // Navigate to Welcome after 10 seconds
     const timer = setTimeout(() => {
-      navigation.replace('Homepage');
+      navigation.replace('Welcome');
     }, 10000);
 
     return () => clearTimeout(timer);
