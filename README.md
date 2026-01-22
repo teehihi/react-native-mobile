@@ -1,308 +1,325 @@
-# BaiTapTuan1 - Buoi2 - Login and Register
+# 📱 DacSanViet Mobile App - TypeScript Version
 
-Ứng dụng React Native TypeScript với tích hợp API Authentication, thực hiện chức năng Register và Login không sử dụng OTP và JWT.
+Ứng dụng di động React Native được phát triển bằng TypeScript với tích hợp API backend hoàn chỉnh, hỗ trợ xác thực JWT và OTP qua email.
 
-## 🎯 Mô tả dự án
+## 🚀 Tính năng chính
 
-Đây là bài tập tuần 1 được nâng cấp với TypeScript và tích hợp API backend. Ứng dụng bao gồm:
+### 🔐 Xác thực & Bảo mật
 
-- **Intro Screen**: Màn hình loading với logo và progress bar (10 giây)
-- **Welcome Screen**: Trang giới thiệu với các nút Đăng nhập/Đăng ký
-- **Login Screen**: Form đăng nhập hỗ trợ email hoặc username
-- **Register Screen**: Form đăng ký tài khoản mới
-- **Homepage Screen**: Hiển thị thông tin cá nhân và chức năng logout
+- **Đăng ký tài khoản** với xác thực OTP qua email
+- **Đăng nhập** với JWT tokens (Access & Refresh)
+- **Quên mật khẩu** với OTP verification
+- **Đặt lại mật khẩu** an toàn
+- **Session management** tự động
 
-## 🚀 Demo giao diện
+### 🎨 Giao diện người dùng
 
-### Navigation Flow
+- **Modern UI/UX** với Material Design
+- **Responsive design** tương thích đa thiết bị
+- **Custom OTP Input** với animation đẹp mắt
+- **Loading states** và error handling
+- **Dark/Light theme** support
+
+### 🛠 Công nghệ sử dụng
+
+- **React Native** với TypeScript
+- **Expo SDK** cho development
+- **React Navigation** v6
+- **Axios** cho API calls
+- **AsyncStorage** cho local storage
+- **FontAwesome** icons
+
+## 📋 Yêu cầu hệ thống
+
+- Node.js >= 16.0.0
+- npm hoặc yarn
+- Expo CLI
+- Android Studio (cho Android)
+- Xcode (cho iOS)
+
+## 🔧 Cài đặt và chạy
+
+### 1. Clone repository
+
+```bash
+git clone <repository-url>
+cd BaiTapTuan1_TypeScript
 ```
-Intro Screen (10s loading)
-    ↓
-Welcome Screen (Trang giới thiệu)
-    ├── Nút "Đăng Nhập" → Login Screen
-    └── Nút "Đăng Ký" → Register Screen
-         ↓ (thành công)
-Homepage Screen (Thông tin cá nhân)
-    ↓ (logout)
-Welcome Screen
-```
 
-### Tính năng giao diện
-- **Intro Screen**: 
-  - Logo animation với fade in effect
-  - Progress bar loading 10 giây
-  - Tự động chuyển sang Welcome Screen
+### 2. Cài đặt dependencies
 
-- **Welcome Screen**:
-  - Logo và thông điệp chào mừng
-  - 3 feature highlights với icons
-  - Nút "Đăng Nhập" (primary button)
-  - Nút "Đăng Ký" (outline button)
-  - Nút "Xem thử" (ghost button)
-
-- **Login Screen**:
-  - Form đăng nhập với validation
-  - Hỗ trợ đăng nhập bằng **email hoặc username**
-  - Toggle hiển thị/ẩn password
-  - Loading state khi đang xử lý
-  - Nút back về Welcome Screen
-
-- **Register Screen**:
-  - Form đăng ký đầy đủ với validation
-  - Các trường: Username, Họ tên, Email, SĐT, Password, Confirm Password
-  - Toggle hiển thị/ẩn password
-  - Validation real-time
-  - Nút back về Welcome Screen
-
-- **Homepage Screen**:
-  - Header với avatar và thông tin user
-  - Hiển thị thông tin từ API (username, email, phone, role, status)
-  - Các section: Sở thích, Kỹ năng, Mục tiêu
-  - Nút logout ở header
-
-## 🔧 Công nghệ sử dụng
-
-### Frontend
-- **React Native**: Framework chính
-- **TypeScript**: Type safety
-- **Expo**: Development platform
-- **React Navigation 7**: Navigation system
-- **FontAwesome Icons**: Icon library
-- **Axios**: HTTP client
-- **AsyncStorage**: Local storage
-
-### Backend API
-- **Node.js**: Runtime
-- **Express.js**: Web framework
-- **MySQL**: Database
-- **bcrypt**: Password hashing
-- **Session-based Authentication**: Không sử dụng JWT
-
-## 📱 Cài đặt và chạy
-
-### 1. Cài đặt dependencies
 ```bash
 npm install
+# hoặc
+yarn install
 ```
 
-### 2. Cấu hình API
-Cập nhật IP address trong `services/api.ts`:
-```typescript
-const API_BASE_URL = 'http://YOUR_IP:3001/api';
-```
+### 3. Khởi động API server
 
-### 3. Chạy API Server
 ```bash
-cd ../GroupAPI_MySQL
+cd ../GroupAPI_JWT_OTP
+npm install
 npm start
 ```
 
-### 4. Chạy React Native App
+### 4. Cấu hình API endpoint
+
+**Cách nhanh (Tự động):**
 ```bash
-npm start
+npm run setup
 ```
 
-### 5. Test trên thiết bị
-- **Android**: Quét QR code bằng Expo Go
-- **iOS**: Quét QR code bằng Camera app
-- **Web**: Mở http://localhost:8081
+**Cách thủ công:**
+```bash
+# Copy template
+cp .env.example .env
+
+# Cập nhật IP tự động
+npm run update-ip
+
+# Hoặc chỉnh sửa .env thủ công
+```
+
+**Tìm IP của máy tính:**
+```bash
+# macOS/Linux
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Windows
+ipconfig
+```
+
+### 5. Chạy ứng dụng
+
+```bash
+# Khởi động Expo
+npm start
+
+# Hoặc chạy trực tiếp
+npm run android  # Cho Android
+npm run ios      # Cho iOS
+```
+
+## � Cấu trúc dự án
+
+```
+BaiTapTuan1_TypeScript/
+├── components/           # Reusable components
+│   └── OTPInput.tsx     # Custom OTP input component
+├── constants/           # App constants
+│   └── theme.ts        # Colors, fonts, sizes
+├── screens/            # App screens
+│   ├── IntroScreen.tsx
+│   ├── WelcomeScreen.tsx
+│   ├── LoginScreen.tsx
+│   ├── RegisterScreen.tsx
+│   ├── ForgotPasswordScreen.tsx
+│   ├── OTPVerificationScreen.tsx
+│   ├── ResetPasswordScreen.tsx
+│   └── HomepageScreen.tsx
+├── services/           # API services
+│   └── api.ts         # API client & methods
+├── types/             # TypeScript types
+│   ├── api.ts        # API types
+│   └── navigation.ts # Navigation types
+├── assets/           # Images, fonts
+└── App.tsx          # Main app component
+```
+
+## 🔌 API Integration
+
+### Backend Server
+
+- **Framework**: Node.js + Express
+- **Database**: MySQL
+- **Authentication**: JWT + OTP
+- **Email Service**: Nodemailer với Gmail
+
+### API Endpoints
+
+```
+POST /api/auth/register              # Đăng ký (legacy)
+POST /api/auth/send-registration-otp # Gửi OTP đăng ký
+POST /api/auth/verify-registration-otp # Xác thực OTP đăng ký
+POST /api/auth/login                 # Đăng nhập
+POST /api/auth/send-password-reset-otp # Gửi OTP reset password
+POST /api/auth/reset-password-otp    # Reset password với OTP
+POST /api/auth/logout               # Đăng xuất
+GET  /api/health                   # Health check
+```
+
+### Environment Variables
+
+```env
+# Server
+PORT=3001
+NODE_ENV=development
+
+# Database
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=DacSanViet
+
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=24h
+
+# Email (Gmail)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+```
+
+## 🎯 User Flow
+
+### Đăng ký tài khoản
+
+1. Nhập thông tin cá nhân
+2. Gửi OTP đến email
+3. Nhập mã OTP 6 số
+4. Xác thực thành công → Tự động đăng nhập
+
+### Đăng nhập
+
+1. Nhập email/username và mật khẩu
+2. Xác thực thành công → Lưu JWT tokens
+3. Chuyển đến trang chủ
+
+### Quên mật khẩu
+
+1. Nhập email
+2. Gửi OTP đến email
+3. Nhập mã OTP 6 số
+4. Nhập mật khẩu mới
+5. Xác nhận mật khẩu → Cập nhật thành công
 
 ## 🧪 Testing
 
 ### Test API Connection
+
 ```bash
-npm run test-api
+# Test kết nối API
+node test-api-connection.js
+
+# Test kết nối từ mobile
+node test-mobile-connection.js
 ```
 
-### Test TypeScript
+### Test Accounts
+
+```
+Admin Account:
+Email: admin@dacsanviet.com
+Password: admin123
+```
+
+## � Troubleshooting
+
+### Lỗi kết nối API
+
+1. Kiểm tra API server đang chạy trên port 3001
+2. Cập nhật IP address trong `api.ts`
+3. Kiểm tra firewall settings
+4. Đảm bảo database đã được setup
+
+### Lỗi OTP
+
+1. Kiểm tra email configuration
+2. Verify Gmail app password
+3. Check spam folder
+
+### Build errors
+
 ```bash
-npm run type-check
-```
+# Clear cache
+npm start -- --clear
 
-### Manual Testing Flow
-1. **Intro Screen**: Xem animation loading 10 giây
-2. **Welcome Screen**: Nhấn các nút điều hướng
-3. **Register**: Tạo tài khoản mới với validation
-4. **Login**: Đăng nhập bằng email hoặc username
-5. **Homepage**: Xem thông tin user và test logout
-
-## 🔐 Authentication Features
-
-### Login
-- **Flexible Input**: Chấp nhận cả email và username
-- **Validation**: Kiểm tra input không rỗng
-- **Session Management**: Lưu session ID và user data
-- **Error Handling**: Hiển thị lỗi từ API
-
-### Register
-- **Full Validation**: Username (min 3), email format, password (min 6)
-- **Confirm Password**: Kiểm tra khớp với password
-- **Optional Fields**: Phone number không bắt buộc
-- **Unique Check**: API kiểm tra email/username đã tồn tại
-
-### Session Management
-- **AsyncStorage**: Lưu session ID và user data local
-- **Auto Logout**: Khi session hết hạn
-- **Secure**: Session-based thay vì JWT
-
-## 📊 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Đăng ký tài khoản
-- `POST /api/auth/login` - Đăng nhập (email hoặc username)
-- `POST /api/auth/logout` - Đăng xuất
-- `POST /api/auth/check-session` - Kiểm tra session
-
-### Example Login Request
-```json
-{
-  "emailOrUsername": "admin@dacsanviet.com",
-  "password": "admin123"
-}
-```
-
-
-
-## 🔍 Validation Rules
-
-### Login
-- **Email/Username**: Không được rỗng
-- **Password**: Không được rỗng
-
-### Register
-- **Username**: Min 3 ký tự, không có khoảng trắng
-- **Email**: Format email hợp lệ
-- **Password**: Min 6 ký tự
-- **Confirm Password**: Phải khớp với password
-- **Full Name**: Bắt buộc
-- **Phone**: Tùy chọn, format số điện thoại
-
-## 🛡️ Security Features
-
-- **Password Hashing**: bcrypt với salt rounds
-- **Session-based Auth**: Không sử dụng JWT
-- **Input Validation**: Client và server side
-- **SQL Injection Prevention**: Prepared statements
-- **Secure Storage**: AsyncStorage cho session data
-
-## 📱 Responsive Design
-
-- **Mobile First**: Thiết kế ưu tiên mobile
-- **Flexible Layout**: Sử dụng Flexbox
-- **Screen Adaptation**: Tự động điều chỉnh theo màn hình
-- **Touch Friendly**: Buttons và inputs có kích thước phù hợp
-
-## 🚨 Error Handling
-
-- **Network Errors**: Hiển thị thông báo kết nối
-- **Validation Errors**: Highlight fields lỗi
-- **API Errors**: Hiển thị message từ server
-- **Loading States**: Disable buttons khi đang xử lý
-
-## 📈 Performance
-
-- **TypeScript**: Type safety và better IDE support
-- **Optimized Images**: WebP format cho logo
-- **Lazy Loading**: Components load khi cần
-- **Memory Management**: Proper cleanup cho timers
-
-## 🎯 Test Accounts
-
-### Admin Account
-- **Email**: admin@dacsanviet.com
-- **Username**: admin
-- **Password**: admin123
-
-### Test Account (tự tạo)
-- Sử dụng form Register để tạo tài khoản test
-
-
-## 🎨 UI/UX Design
-
-### Color Scheme
-- **Primary**: #667eea (Blue gradient)
-- **Success**: #2ecc71 (Green)
-- **Warning**: #f39c12 (Orange)
-- **Error**: #e74c3c (Red)
-- **Background**: #f5f7fa (Light gray)
-
-### Typography
-- **Headers**: Bold, 24-32px
-- **Body**: Regular, 14-16px
-- **Captions**: Light, 12px
-
-### Components
-- **Buttons**: Rounded corners, shadows, icons
-- **Input Fields**: Clean design với icons
-- **Cards**: Shadow effects, rounded corners
-- **Loading States**: Activity indicators
-
-## 📁 Cấu trúc project
-
-```
-BaiTapTuan1_TypeScript/
-├── screens/
-│   ├── IntroScreen.tsx          # Loading screen
-│   ├── WelcomeScreen.tsx        # Trang giới thiệu (mới)
-│   ├── LoginScreen.tsx          # Đăng nhập
-│   ├── RegisterScreen.tsx       # Đăng ký
-│   └── HomepageScreen.tsx       # Trang chính
-├── services/
-│   └── api.ts                   # API service layer
-├── types/
-│   ├── navigation.ts            # Navigation types
-│   ├── api.ts                   # API types
-│   └── profile.ts               # Profile types
-├── constants/
-│   └── theme.ts                 # Theme constants
-├── assets/
-│   └── dacsanvietLogo.webp     # Logo
-└── App.tsx                      # Main app component
+# Reset Metro bundler
+npx react-native start --reset-cache
 ```
 
 ## Demo Giao diện
-
-<table>
+<table align="center">
   <tr>
     <td align="center">
-      <img src="screenshots/loadingScreen.png" width="280"/><br/>
+      <img src="screenshots/loadingScreen.png" width="280" />
+      <br />
       <em>Màn hình loading</em>
     </td>
     <td align="center">
-      <img src="screenshots/homePage.png" width="280"/><br/>
+      <img src="screenshots/homePage.png" width="280" />
+      <br />
       <em>Giao diện trang chủ giới thiệu bản thân</em>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <img src="screenshots/welcome.png" width="280" />
+      <br />
+      <em>Màn hình Welcome</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/loginScreen.png" width="280" />
+      <br />
+      <em>Giao diện trang đăng nhập đơn giản</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/registerScreen.png" width="280" />
+      <br />
+      <em>Giao diện trang đăng ký đơn giản</em>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="screenshots/welcome.png" width="280"/><br/>
-      <em>Màn hình Welcome</em>
+      <img src="screenshots/forgotScreen.png" width="280" />
+      <br />
+      <em>Giao diện quên mật khẩu</em>
     </td>
     <td align="center">
-      <img src="screenshots/loginScreen.png" width="280"/><br/>
-      <em>Giao diện trang đăng nhập đơn giản</em>
+      <img src="screenshots/otpScreen.png" width="280" />
+      <br />
+      <em>Giao diện trang nhập mã OTP</em>
     </td>
     <td align="center">
-      <img src="screenshots/registerScreen.png" width="280"/><br/>
-      <em>Giao diện trang đăng ký đơn giản</em>
+      <img src="screenshots/emailScreen.png" width="280" />
+      <br />
+      <em>Giao diện Email được gửi đi</em>
     </td>
   </tr>
+  <tr>
+    <td align="center">
+      <img src="screenshots/resetPass.png" width="280" />
+      <br />
+      <em>Giao diện đặt lại mật khẩu sau khi xác thực OTP</em>
+    </td>
+  </tr>
+
 </table>
+
 
 ## 📝 Changelog
 
-### Version 2.0.0 (Current)
-- ✅ Thêm Welcome Screen với UI/UX đẹp
-- ✅ Login hỗ trợ email và username
-- ✅ Tích hợp API MySQL backend
-- ✅ Session management hoàn chỉnh
-- ✅ TypeScript type safety
-- ✅ Error handling và validation
-- ✅ Responsive design
+### Version 2.0.0 (Latest)
+
+- ✅ **NEW**: TypeScript integration hoàn chỉnh
+- ✅ **NEW**: JWT Authentication với Access & Refresh tokens
+- ✅ **NEW**: OTP verification qua email
+- ✅ **NEW**: Custom OTP Input component với UI đẹp
+- ✅ **NEW**: Reset password flow hoàn chỉnh
+- ✅ **NEW**: API integration với MySQL backend
+- ✅ **IMPROVED**: Error handling và validation
+- ✅ **IMPROVED**: UI/UX với modern design
+- ✅ **IMPROVED**: Navigation flow tối ưu
 
 ### Version 1.0.0
-- ✅ Basic Intro và Homepage screens
-- ✅ Static content display
+
+- ✅ Basic React Native app
+- ✅ Simple authentication
+- ✅ Basic UI components
 
 ## 🤝 Đóng góp
 
@@ -321,7 +338,6 @@ BaiTapTuan1_TypeScript/
 - 🌐 Linktree: [linktr.ee/nkqt.tee](https://linktr.ee/nkqt.tee)
 
 ---
-
 
 <div align="center">
 

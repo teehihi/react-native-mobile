@@ -12,6 +12,10 @@ export const COLORS = {
   darkGray: '#95a5a6',
   lightGray: '#f8f9fa',
   
+  // Thêm màu cho OTP input
+  lightSuccess: '#d5f4e6',
+  lightError: '#3498db',
+  
   text: '#2c3e50',
   textSecondary: '#34495e',
   textLight: '#7f8c8d',
@@ -45,6 +49,7 @@ export const FONTS = {
   body2: { fontSize: SIZES.body2, fontWeight: 'normal' as const },
   body3: { fontSize: SIZES.body3, fontWeight: 'normal' as const },
   caption: { fontSize: SIZES.caption, fontWeight: 'normal' as const },
+  bold: 'bold' as const,
 } as const;
 
 // Export theme object with colors property for compatibility

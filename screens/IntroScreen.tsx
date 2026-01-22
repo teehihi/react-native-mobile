@@ -8,6 +8,7 @@ import {
   Text,
 } from 'react-native';
 import { NavigationProps } from '../types/navigation';
+import { ApiService } from '../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -18,6 +19,27 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ navigation }) => {
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Check if user is already logged in
+    const checkSession = async () => {
+      try {
+        const isLoggedIn = await ApiService.checkSession();
+        if (isLoggedIn) {
+          // User is logged in, navigate to Homepage after animation
+          setTimeout(() => {
+            navigation.replace('Homepage');
+          }, 3000); // Shorter time for logged in users
+          return;
+        }
+      } catch (error) {
+        console.log('Session check error:', error);
+      }
+      
+      // User not logged in, continue with normal flow
+      setTimeout(() => {
+        navigation.replace('Welcome');
+      }, 10000);
+    };
+
     // Logo fade in animation
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -32,12 +54,8 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ navigation }) => {
       useNativeDriver: false,
     }).start();
 
-    // Navigate to Welcome after 10 seconds
-    const timer = setTimeout(() => {
-      navigation.replace('Welcome');
-    }, 10000);
-
-    return () => clearTimeout(timer);
+    // Check session and navigate
+    checkSession();
   }, [navigation, fadeAnim, progressAnim]);
 
   const progressWidth = progressAnim.interpolate({

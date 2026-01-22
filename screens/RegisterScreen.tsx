@@ -72,24 +72,36 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
     setLoading(true);
     try {
       const { confirmPassword, ...registerData } = formData;
-      const response = await ApiService.register({
-        ...registerData,
-        username: registerData.username.trim(),
+      
+      // Send OTP for registration
+      const response = await ApiService.sendRegistrationOTP({
         email: registerData.email.trim(),
         fullName: registerData.fullName.trim(),
-        phoneNumber: registerData.phoneNumber.trim() || undefined,
       });
       
       if (response.success) {
         Alert.alert(
           'Thành công', 
-          'Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.',
+          'Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra email để xác thực.',
           [
-            { text: 'OK', onPress: () => navigation.navigate('Login') }
+            { 
+              text: 'OK', 
+              onPress: () => navigation.navigate('OTPVerification', {
+                email: registerData.email.trim(),
+                purpose: 'registration',
+                userData: {
+                  username: registerData.username.trim(),
+                  email: registerData.email.trim(),
+                  password: registerData.password,
+                  fullName: registerData.fullName.trim(),
+                  phoneNumber: registerData.phoneNumber.trim() || undefined,
+                }
+              })
+            }
           ]
         );
       } else {
-        Alert.alert('Lỗi', response.message || 'Đăng ký thất bại');
+        Alert.alert('Lỗi', response.message || 'Không thể gửi OTP');
       }
     } catch (error) {
       Alert.alert('Lỗi', 'Có lỗi xảy ra. Vui lòng thử lại.');
@@ -218,7 +230,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
             {loading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text style={styles.registerButtonText}>Đăng Ký</Text>
+              <>
+                <FontAwesome name="paper-plane" size={16} color="white" style={{ marginRight: 8 }} />
+                <Text style={styles.registerButtonText}>Đăng Ký</Text>
+              </>
             )}
           </TouchableOpacity>
 
@@ -313,6 +328,8 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   registerButton: {
+    flexDirection: 'row', 
+    justifyContent: 'center',
     backgroundColor: theme.colors.primary,
     borderRadius: 12,
     paddingVertical: 16,

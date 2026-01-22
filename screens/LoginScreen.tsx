@@ -76,7 +76,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <FontAwesome name="user" size={20} color={theme.colors.gray} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Email hoặc Username"
+              placeholder="Email hoặc tên đăng nhập"
               value={emailOrUsername}
               onChangeText={setEmailOrUsername}
               autoCapitalize="none"
@@ -116,6 +116,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             ) : (
               <Text style={styles.loginButtonText}>Đăng Nhập</Text>
             )}
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.forgotPasswordButton}
+            onPress={() => navigation.navigate('ForgotPassword')}
+          >
+            <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
           </TouchableOpacity>
 
           <View style={styles.registerContainer}>
@@ -230,6 +237,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  forgotPasswordButton: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: theme.colors.primary,
+    fontWeight: '500',
   },
   registerContainer: {
     flexDirection: 'row',

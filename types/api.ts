@@ -3,7 +3,7 @@ export interface User {
   username: string;
   email: string;
   fullName: string;
-  phoneNumber?: string;
+  phoneNumber?: string | null;
   role: 'ADMIN' | 'STAFF' | 'USER';
   isActive: boolean;
   createdAt: string;
@@ -13,6 +13,12 @@ export interface User {
 export interface Session {
   sessionId: string;
   expiresAt: string;
+}
+
+export interface JWTTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: string;
 }
 
 export interface LoginRequest {
@@ -28,6 +34,26 @@ export interface RegisterRequest {
   phoneNumber?: string;
 }
 
+export interface SendOTPRequest {
+  email: string;
+  fullName?: string;
+}
+
+export interface VerifyRegistrationOTPRequest {
+  email: string;
+  otpCode: string;
+  username: string;
+  password: string;
+  fullName: string;
+  phoneNumber?: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  otpCode: string;
+  newPassword: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -36,9 +62,17 @@ export interface ApiResponse<T> {
 
 export interface LoginResponse {
   user: User;
+  tokens: JWTTokens;
   session: Session;
 }
 
 export interface RegisterResponse {
   user: User;
+  tokens: JWTTokens;
+}
+
+export interface SendOTPResponse {
+  email: string;
+  expiresAt: string;
+  expiresIn: string;
 }
