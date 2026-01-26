@@ -115,7 +115,10 @@ const OTPVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
             [
               {
                 text: 'OK',
-                onPress: () => navigation.replace('Homepage'),
+                onPress: () => navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Homepage' }],
+                }),
               },
             ]
           );

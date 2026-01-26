@@ -39,7 +39,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       
       if (response.success) {
         Alert.alert('Thành công', 'Đăng nhập thành công!', [
-          { text: 'OK', onPress: () => navigation.replace('Homepage') }
+          { text: 'OK', onPress: () => navigation.reset({
+            index: 0,
+            routes: [{ name: 'Homepage' }],
+          }) }
         ]);
       } else {
         Alert.alert('Lỗi', response.message || 'Đăng nhập thất bại');

@@ -26,7 +26,10 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ navigation }) => {
         if (isLoggedIn) {
           // User is logged in, navigate to Homepage after animation
           setTimeout(() => {
-            navigation.replace('Homepage');
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Homepage' }],
+            });
           }, 3000); // Shorter time for logged in users
           return;
         }

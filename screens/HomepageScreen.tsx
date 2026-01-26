@@ -44,10 +44,16 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
           onPress: async () => {
             try {
               await ApiService.logout();
-              navigation.replace('Welcome');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Welcome' }],
+              });
             } catch (error) {
               console.log('Logout error:', error);
-              navigation.replace('Welcome');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Welcome' }],
+              });
             }
           },
         },
