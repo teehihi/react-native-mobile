@@ -28,6 +28,7 @@ export type NavigationProps = {
       screen: T,
       params?: RootStackParamList[T]
     ) => void;
+    reset: (state: { index: number; routes: { name: keyof RootStackParamList }[] }) => void;
     goBack: () => void;
   };
 };

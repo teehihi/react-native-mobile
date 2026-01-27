@@ -15,6 +15,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProps } from '../types/navigation';
 import { ApiService } from '../services/api';
 import { theme } from '../constants/theme';
+import { useAuth } from '../hooks/useAuth';
+import { sanitizeInput } from '../utils/validation';
 
 interface LoginScreenProps extends NavigationProps {}
 
@@ -24,8 +26,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const { login } = useAuth();
+
   const handleLogin = async () => {
-    if (!emailOrUsername.trim() || !password.trim()) {
+    // Layer 3: Input Sanitization
+    const cleanEmailOrUsername = sanitizeInput(emailOrUsername.trim());
+    
+    // Layer 1: Input Validation
+    if (!cleanEmailOrUsername || !password) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
       return;
     }
@@ -33,11 +41,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     setLoading(true);
     try {
       const response = await ApiService.login({ 
-        emailOrUsername: emailOrUsername.trim(), 
+        emailOrUsername: cleanEmailOrUsername, 
         password 
       });
       
-      if (response.success) {
+      if (response.success && response.data) {
+        // Layer 2: Authentication (Store token context)
+        await login(response.data.tokens.accessToken, response.data.user);
+        
         Alert.alert('Thành công', 'Đăng nhập thành công!', [
           { text: 'OK', onPress: () => navigation.reset({
             index: 0,

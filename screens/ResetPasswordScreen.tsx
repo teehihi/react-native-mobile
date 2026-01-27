@@ -17,6 +17,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { ApiService } from '../services/api';
 import { theme } from '../constants/theme';
+import { validatePassword } from '../utils/validation';
 
 type ResetPasswordScreenRouteProp = RouteProp<RootStackParamList, 'ResetPassword'>;
 type ResetPasswordScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ResetPassword'>;
@@ -34,9 +35,7 @@ const ResetPasswordScreen: React.FC<Props> = ({ route, navigation }) => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const validatePassword = (password: string) => {
-    return password.length >= 6;
-  };
+
 
   const handleResetPassword = async () => {
     if (!newPassword.trim()) {
@@ -44,8 +43,9 @@ const ResetPasswordScreen: React.FC<Props> = ({ route, navigation }) => {
       return;
     }
 
-    if (!validatePassword(newPassword)) {
-      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+    const passCheck = validatePassword(newPassword);
+    if (!passCheck.isValid) {
+      Alert.alert('Lỗi', passCheck.message || 'Mật khẩu không hợp lệ');
       return;
     }
 

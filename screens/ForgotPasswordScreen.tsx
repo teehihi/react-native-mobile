@@ -16,6 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { ApiService } from '../services/api';
 import { theme } from '../constants/theme';
+import { validateEmail } from '../utils/validation';
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 
@@ -27,10 +28,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+
 
   const handleSendOTP = async () => {
     if (!email.trim()) {

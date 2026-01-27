@@ -15,6 +15,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProps } from '../types/navigation';
 import { ApiService } from '../services/api';
 import { theme } from '../constants/theme';
+import { sanitizeInput, validateEmail, validatePassword } from '../utils/validation';
 
 interface RegisterScreenProps extends NavigationProps {}
 
@@ -38,18 +39,23 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const validateForm = () => {
     const { username, email, password, confirmPassword, fullName } = formData;
 
-    if (!username.trim() || !email.trim() || !password.trim() || !fullName.trim()) {
+    const cleanUsername = sanitizeInput(username.trim());
+    const cleanEmail = sanitizeInput(email.trim());
+    const cleanFullName = sanitizeInput(fullName.trim());
+
+    if (!cleanUsername || !cleanEmail || !password || !cleanFullName) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin bắt buộc');
       return false;
     }
 
-    if (!email.includes('@')) {
+    if (!validateEmail(cleanEmail)) {
       Alert.alert('Lỗi', 'Email không hợp lệ');
       return false;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+    const passCheck = validatePassword(password);
+    if (!passCheck.isValid) {
+      Alert.alert('Lỗi', passCheck.message || 'Mật khẩu không hợp lệ');
       return false;
     }
 
@@ -58,11 +64,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
       return false;
     }
 
-    if (username.length < 3) {
+    if (cleanUsername.length < 3) {
       Alert.alert('Lỗi', 'Tên đăng nhập phải có ít nhất 3 ký tự');
       return false;
     }
 
+    // Update state with sanitized values if necessary, but here we just return valid
     return true;
   };
 
@@ -77,6 +84,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
       const response = await ApiService.sendRegistrationOTP({
         email: registerData.email.trim(),
         fullName: registerData.fullName.trim(),
+        username: registerData.username.trim(),
       });
       
       if (response.success) {

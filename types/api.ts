@@ -10,6 +10,8 @@ export interface User {
   updatedAt: string;
 }
 
+
+
 export interface Session {
   sessionId: string;
   expiresAt: string;
@@ -37,6 +39,7 @@ export interface RegisterRequest {
 export interface SendOTPRequest {
   email: string;
   fullName?: string;
+  username?: string;
 }
 
 export interface VerifyRegistrationOTPRequest {

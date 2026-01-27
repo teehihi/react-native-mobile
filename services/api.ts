@@ -20,7 +20,7 @@ import {
   RegisterResponse,
   SendOTPResponse,
   User,
-  JWTTokens
+  JWTTokens,
 } from '../types/api';
 
 // API Configuration từ environment variables
@@ -55,10 +55,21 @@ const apiClient = axios.create({
   },
 });
 
-// Add request interceptor để log requests
+// Add request interceptor để log requests & Inject Token (Layer 2: Authentication)
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
     console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    
+    // Inject Token
+    try {
+      const token = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Error getting token', error);
+    }
+    
     return config;
   },
   (error) => {
@@ -67,21 +78,46 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Add response interceptor để log responses
+// Add response interceptor để log responses & Handle Errors (Layer 4: Rate Limiting, Layer 3: Authz)
 apiClient.interceptors.response.use(
   (response) => {
     console.log(`✅ API Response: ${response.status} ${response.config.url}`);
     return response;
   },
-  (error) => {
-    console.error(`❌ API Error: ${error.response?.status || 'Network Error'} ${error.config?.url}`);
-    console.error('Error details:', error.message);
+  async (error) => {
+    const status = error.response?.status;
+    const url = error.config?.url;
+    
+    console.error(`❌ API Error: ${status || 'Network Error'} ${url}`);
+
+    if (status === 401) {
+      // Layer 2: Authentication Failure - Token Invalid/Expired
+      console.log('🔒 401 Unauthorized - Logout user or Refresh token');
+      // Logic to logout or refresh token could go here
+      // For now, we might rely on the sensitive UI to redirect to login
+    }
+
+    if (status === 403) {
+      // Layer 3: Authorization Failure - Forbidden
+      console.log('🚫 403 Forbidden - User does not have permission');
+    }
+
+    if (status === 429) {
+      // Layer 4: Rate Limiting
+      console.warn('⏳ 429 Too Many Requests - Please look at Rate Limit headers');
+      // Ideally, show a toast or alert to the user
+    }
+
+    if (error.response?.data) {
+      console.error('❌ Error Response Data:', JSON.stringify(error.response.data, null, 2));
+    }
+
     return Promise.reject(error);
   }
 );
 
 // Storage keys
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'accessToken',
   REFRESH_TOKEN: 'refreshToken',
   SESSION_ID: 'sessionId',
@@ -268,6 +304,23 @@ export class ApiService {
       return await AsyncStorage.getItem(STORAGE_KEYS.SESSION_ID);
     } catch (error) {
       return null;
+    }
+  }
+
+
+  // Delete user
+  static async deleteUser(id: number | string): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.delete<ApiResponse<any>>(`/users/${id}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
     }
   }
 }
