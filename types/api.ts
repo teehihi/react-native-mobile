@@ -14,8 +14,32 @@ export interface User {
 
 export interface Session {
   sessionId: string;
+  userId: number;
+  ipAddress?: string;
+  userAgent?: string;
   expiresAt: string;
+  createdAt?: string;
+  isActive?: boolean;
 }
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  byRole: {
+    ADMIN: number;
+    STAFF: number;
+    USER: number;
+  };
+  newUsersToday: number;
+}
+
+export interface SessionStats {
+  totalSessions: number;
+  activeSessions: number;
+  expiredSessions: number;
+}
+
 
 export interface JWTTokens {
   accessToken: string;

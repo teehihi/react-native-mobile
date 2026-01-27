@@ -16,11 +16,14 @@ import {
   VerifyRegistrationOTPRequest,
   ResetPasswordRequest,
   ApiResponse, 
-  LoginResponse, 
+  LoginResponse,
   RegisterResponse,
   SendOTPResponse,
   User,
   JWTTokens,
+  UserStats,
+  SessionStats,
+  Session,
 } from '../types/api';
 
 // API Configuration từ environment variables
@@ -312,6 +315,160 @@ export class ApiService {
   static async deleteUser(id: number | string): Promise<ApiResponse<any>> {
     try {
       const response = await apiClient.delete<ApiResponse<any>>(`/users/${id}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Toggle user status (Active/Inactive)
+  static async toggleUserStatus(id: number | string): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.patch<ApiResponse<any>>(`/users/${id}/toggle-status`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Search users
+  static async searchUsers(query: string, limit: number = 20): Promise<ApiResponse<User[]>> {
+    try {
+      const response = await apiClient.get<ApiResponse<User[]>>('/users/search', {
+        params: { q: query, limit }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get user stats
+  static async getUserStats(): Promise<ApiResponse<UserStats>> {
+    try {
+      const response = await apiClient.get<ApiResponse<UserStats>>('/users/stats');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get users by role
+  static async getUsersByRole(role: string, limit: number = 50): Promise<ApiResponse<{users: User[], total: number}>> {
+    try {
+      const response = await apiClient.get<ApiResponse<{users: User[], total: number}>>(`/users/role/${role}`, {
+        params: { limit }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // --- Session APIs ---
+
+  // Get all sessions
+  static async getAllSessions(page: number = 1, limit: number = 50): Promise<ApiResponse<{sessions: Session[], pagination: any, stats: SessionStats}>> {
+    try {
+      const response = await apiClient.get<ApiResponse<{sessions: Session[], pagination: any, stats: SessionStats}>>('/sessions', {
+        params: { page, limit }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get session stats
+  static async getSessionStats(): Promise<ApiResponse<{stats: SessionStats}>> {
+    try {
+      const response = await apiClient.get<ApiResponse<{stats: SessionStats}>>('/sessions/stats');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get sessions by IP
+  static async getSessionsByIp(ip: string, limit: number = 20): Promise<ApiResponse<{sessions: Session[], total: number}>> {
+    try {
+      const response = await apiClient.get<ApiResponse<{sessions: Session[], total: number}>>(`/sessions/ip/${ip}`, {
+        params: { limit }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Cleanup expired sessions
+  static async cleanupExpiredSessions(): Promise<ApiResponse<{deletedSessions: number}>> {
+    try {
+      const response = await apiClient.delete<ApiResponse<{deletedSessions: number}>>('/sessions/cleanup');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Delete specific session
+  static async deleteSession(sessionId: string): Promise<ApiResponse<{sessionId: string}>> {
+    try {
+      const response = await apiClient.delete<ApiResponse<{sessionId: string}>>(`/sessions/${sessionId}`);
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {
