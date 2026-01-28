@@ -10,7 +10,8 @@ import RegisterScreen from '../screens/RegisterScreen';
 import OTPVerificationScreen from '../screens/OTPVerificationScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
-import HomepageScreen from '../screens/HomepageScreen';
+import HomepageScreen from '../screens/HomepageScreen'; // Keep for type ref if needed, but unused in stack if replaced
+import { MainTabNavigator } from './MainTabNavigator';
 import { RootStackParamList } from '../types/navigation';
 import { useAuth } from '../hooks/useAuth';
 import { ActivityIndicator, View } from 'react-native';
@@ -45,7 +46,7 @@ export const AppNavigator = () => {
         <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-        <Stack.Screen name="Homepage" component={HomepageScreen} />
+        <Stack.Screen name="Homepage" component={MainTabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

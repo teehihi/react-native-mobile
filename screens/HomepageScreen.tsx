@@ -1,373 +1,89 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
-import { PersonalInfo, Skill } from '../types/profile';
-import { User } from '../types/api';
+import React, { useState } from 'react';
+import { ScrollView, RefreshControl, Alert, StatusBar, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuthStore } from '../store/authStore';
 import { ApiService } from '../services/api';
 import { NavigationProps } from '../types/navigation';
+import { PRODUCTS } from '../services/mockData';
+import { HomepageHeader } from '../components/HomepageHeader';
+import { ServiceGrid } from '../components/ServiceGrid';
+import { ProductSection } from '../components/ProductSection';
+import { UserProfileModal } from '../components/UserProfileModal';
+import { PromoBanner } from '../components/PromoBanner';
+import { RecommendationSection } from '../components/RecommendationSection';
 
 interface HomepageScreenProps extends NavigationProps {}
 
 const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { user, logout } = useAuthStore();
+  const [refreshing, setRefreshing] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
 
-  useEffect(() => {
-    loadUserData();
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
-  const loadUserData = async () => {
-    try {
-      const user = await ApiService.getCurrentUser();
-      setCurrentUser(user);
-    } catch (error) {
-      console.log('Error loading user data:', error);
-    }
-  };
-
   const handleLogout = () => {
-    Alert.alert(
-      'Đăng xuất',
-      'Bạn có chắc chắn muốn đăng xuất?',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Đăng xuất',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await ApiService.logout();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Welcome' }],
-              });
-            } catch (error) {
-              console.log('Logout error:', error);
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Welcome' }],
-              });
-            }
-          },
+    Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất?', [
+      { text: 'Hủy', style: 'cancel' },
+      {
+        text: 'Đăng xuất',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await ApiService.logout();
+            await logout();
+            navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+          } catch (error) {
+            console.log('Logout error:', error);
+          }
         },
-      ]
-    );
-  };
-  // Personal information data
-  const personalInfo: PersonalInfo = {
-    name: currentUser?.fullName || 'Người dùng',
-    age: 20,
-    occupation: 'Sinh viên IT',
-    school: 'ĐH Công nghệ Kỹ thuật TP.HCM',
-    major: 'Công nghệ thông tin',
+      },
+    ]);
   };
 
-  // Skills data
-  const skills: Skill[] = [
-    { name: 'TypeScript/React Native', level: 85, color: '#3498db' },
-    { name: 'JavaScript/ES6+', level: 90, color: '#f1c40f' },
-    { name: 'HTML/CSS', level: 88, color: '#e74c3c' },
-    { name: 'Git/GitHub', level: 80, color: '#e67e22' },
-    { name: 'Mobile Development', level: 82, color: '#1abc9c' },
+  // Service grid items
+  const services = [
+    { id: 1, name: 'Bánh Kẹo', icon: 'candy', color: '#fbbf24' },
+    { id: 2, name: 'Trà & Café', icon: 'coffee', color: '#8b5cf6' },
+    { id: 3, name: 'Đồ Khô', icon: 'fish', color: '#06b6d4' },
+    { id: 4, name: 'Gia Vị', icon: 'shaker', color: '#f97316' },
+    { id: 5, name: 'Quà Tặng', icon: 'gift', color: '#ec4899' },
+    { id: 6, name: 'Đặc Sản', icon: 'food-variant', color: '#10b981' },
+    { id: 7, name: 'Trái Cây', icon: 'fruit-cherries', color: '#ef4444' },
+    { id: 8, name: 'Xem Tất Cả', icon: 'apps', color: '#6b7280' },
   ];
-
-  const hobbies = [
-    'Lập trình ứng dụng di động',
-    'Học hỏi công nghệ mới',
-    'Chơi game và xem phim',
-    'Du lịch và khám phá',
-  ];
-
-  const SkillBar: React.FC<{ skill: Skill }> = ({ skill }) => (
-    <View style={styles.skillContainer}>
-      <View style={styles.skillHeader}>
-        <Text style={styles.skillName}>{skill.name}</Text>
-        <Text style={styles.skillPercent}>{skill.level}%</Text>
-      </View>
-      <View style={styles.skillBarBackground}>
-        <View
-          style={[
-            styles.skillBarFill,
-            { width: `${skill.level}%`, backgroundColor: skill.color },
-          ]}
-        />
-      </View>
-    </View>
-  );
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Image
-            source={require('../assets/dacsanvietLogo.webp')}
-            style={styles.avatar}
-            resizeMode="contain"
-          />
-          <View style={styles.onlineIndicator} />
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
+      <SafeAreaView className="flex-1 bg-green-600" edges={[]}>
+        <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#16a34a" />
+        }
+      >
+        <HomepageHeader user={user} onAvatarPress={() => setShowUserModal(true)} />
+        <View className="bg-gray-50 flex-1">
+          <ServiceGrid services={services} />
+          <PromoBanner />
+          <ProductSection title="Mua Ngay" products={PRODUCTS} />
+          <ProductSection title="Đặt lại" products={PRODUCTS} />
+          <RecommendationSection products={PRODUCTS} />
         </View>
-        <View style={styles.headerInfo}>
-          <Text style={styles.name}>{personalInfo.name}</Text>
-          <Text style={styles.title}>{personalInfo.occupation}</Text>
-          <Text style={styles.subtitle}>{currentUser?.email || 'user@example.com'}</Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <FontAwesome name="sign-out" size={20} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
 
-      <View style={styles.content}>
-        {/* Personal Information */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: '#3498db' }]}>
-              <FontAwesome name="user" size={16} color="#ffffff" />
-            </View>
-            <Text style={styles.cardTitle}>Thông tin cá nhân</Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Username:</Text>
-            <Text style={styles.value}>{currentUser?.username || 'N/A'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Email:</Text>
-            <Text style={styles.value}>{currentUser?.email || 'N/A'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Số điện thoại:</Text>
-            <Text style={styles.value}>{currentUser?.phoneNumber || 'Chưa cập nhật'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Vai trò:</Text>
-            <Text style={styles.value}>{currentUser?.role || 'USER'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Trạng thái:</Text>
-            <Text style={[styles.value, { color: currentUser?.isActive ? '#27ae60' : '#e74c3c' }]}>
-              {currentUser?.isActive ? 'Hoạt động' : 'Không hoạt động'}
-            </Text>
-          </View>
-        </View>
-
-        {/* Hobbies */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: '#e74c3c' }]}>
-              <FontAwesome name="heart" size={16} color="#ffffff" />
-            </View>
-            <Text style={styles.cardTitle}>Sở thích</Text>
-          </View>
-          
-          {hobbies.map((hobby: string, index: number) => (
-            <View key={index} style={styles.hobbyItem}>
-              <Ionicons name="checkmark-circle" size={16} color="#3498db" />
-              <Text style={styles.hobbyText}>{hobby}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Skills */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: '#9b59b6' }]}>
-              <MaterialIcons name="code" size={18} color="#ffffff" />
-            </View>
-            <Text style={styles.cardTitle}>Kỹ năng lập trình</Text>
-          </View>
-          
-          {skills.map((skill: Skill, index: number) => (
-            <SkillBar key={index} skill={skill} />
-          ))}
-        </View>
-
-        {/* Goals */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: '#27ae60' }]}>
-              <FontAwesome name="bullseye" size={16} color="#ffffff" />
-            </View>
-            <Text style={styles.cardTitle}>Mục tiêu</Text>
-          </View>
-          
-          {[
-            'Trở thành Mobile Developer chuyên nghiệp',
-            'Phát triển ứng dụng hữu ích cho cộng đồng',
-            'Học hỏi và chia sẻ kiến thức',
-            'Tham gia các dự án mã nguồn mở',
-          ].map((goal: string, index: number) => (
-            <View key={index} style={styles.hobbyItem}>
-              <Ionicons name="arrow-forward-circle" size={16} color="#27ae60" />
-              <Text style={styles.hobbyText}>{goal}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    </ScrollView>
+      <UserProfileModal
+        visible={showUserModal}
+        user={user}
+        onClose={() => setShowUserModal(false)}
+        onLogout={handleLogout}
+      />
+      </SafeAreaView>
+    </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f7fa',
-  },
-  header: {
-    backgroundColor: '#667eea',
-    paddingTop: 50,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginRight: 15,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#ffffff',
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  onlineIndicator: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 12,
-    height: 12,
-    backgroundColor: '#2ecc71',
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 2,
-  },
-  title: {
-    fontSize: 14,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginBottom: 2,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#ffffff',
-    opacity: 0.8,
-  },
-  logoutButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  content: {
-    padding: 20,
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    width: 100,
-    fontWeight: '500',
-  },
-  value: {
-    fontSize: 14,
-    color: '#2c3e50',
-    flex: 1,
-    fontWeight: '500',
-  },
-  hobbyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  hobbyText: {
-    fontSize: 14,
-    color: '#34495e',
-    flex: 1,
-    marginLeft: 8,
-  },
-  skillContainer: {
-    marginBottom: 15,
-  },
-  skillHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  skillName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2c3e50',
-  },
-  skillPercent: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    fontWeight: '500',
-  },
-  skillBarBackground: {
-    height: 6,
-    backgroundColor: '#ecf0f1',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  skillBarFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-});
 
 export default HomepageScreen;

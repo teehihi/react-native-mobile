@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { AppNavigator } from './navigation/AppNavigator';
+import './global.css';
+import './services/nativewindInterop';
 import { useAuthStore } from './store/authStore';
 
 // Component to initialize auth state
@@ -13,10 +15,17 @@ const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) 
   return <>{children}</>;
 }
 
+import { PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 export default function App(): React.JSX.Element {
   return (
     <AuthInitializer>
-      <AppNavigator />
+      <SafeAreaProvider>
+        <PaperProvider>
+          <AppNavigator />
+        </PaperProvider>
+      </SafeAreaProvider>
     </AuthInitializer>
   );
 }

@@ -14,20 +14,26 @@
 
 ### 🎨 Giao diện người dùng
 
-- **Modern UI/UX** với Material Design
-- **Responsive design** tương thích đa thiết bị
+- **Grab-inspired Homepage** với UI/UX hiện đại
+- **Modular Component Architecture** dễ bảo trì
 - **Custom OTP Input** với animation đẹp mắt
+- **User Profile Modal** với thông tin chi tiết
+- **Product Cards** với hình ảnh và giảm giá
+- **Service Grid** 4x2 cho danh mục sản phẩm
+- **Responsive design** tương thích đa thiết bị
 - **Loading states** và error handling
-- **Dark/Light theme** support
 
 ### 🛠 Công nghệ sử dụng
 
 - **React Native** với TypeScript
 - **Expo SDK** cho development
-- **React Navigation** v6
+- **React Navigation** v6 (Stack + Bottom Tabs)
+- **NativeWind** (Tailwind CSS for React Native)
+- **React Native Paper** cho Material Design components
 - **Axios** cho API calls
 - **AsyncStorage** cho local storage
-- **FontAwesome** icons
+- **Zustand** cho state management
+- **MaterialCommunityIcons** icons
 
 ## 📋 Yêu cầu hệ thống
 
@@ -100,15 +106,20 @@ npm run android  # Cho Android
 npm run ios      # Cho iOS
 ```
 
-## � Cấu trúc dự án
+## 📂 Cấu trúc dự án
 
 ```
-BaiTapTuan1_TypeScript/
-├── components/           # Reusable components
-│   └── OTPInput.tsx     # Custom OTP input component
-├── constants/           # App constants
-│   └── theme.ts        # Colors, fonts, sizes
-├── screens/            # App screens
+BaiTapCaNhan/
+├── components/              # Reusable components
+│   ├── OTPInput.tsx        # Custom OTP input
+│   ├── CustomTabBar.tsx    # Custom bottom tab bar
+│   ├── HomepageHeader.tsx  # Homepage header with search
+│   ├── ServiceGrid.tsx     # Service category grid
+│   ├── ProductSection.tsx  # Horizontal product list
+│   ├── PromoBanner.tsx     # Promotional banner
+│   ├── RecommendationSection.tsx # Product recommendations
+│   └── UserProfileModal.tsx # User profile popup
+├── screens/                # App screens
 │   ├── IntroScreen.tsx
 │   ├── WelcomeScreen.tsx
 │   ├── LoginScreen.tsx
@@ -116,14 +127,24 @@ BaiTapTuan1_TypeScript/
 │   ├── ForgotPasswordScreen.tsx
 │   ├── OTPVerificationScreen.tsx
 │   ├── ResetPasswordScreen.tsx
-│   └── HomepageScreen.tsx
-├── services/           # API services
-│   └── api.ts         # API client & methods
-├── types/             # TypeScript types
-│   ├── api.ts        # API types
-│   └── navigation.ts # Navigation types
-├── assets/           # Images, fonts
-└── App.tsx          # Main app component
+│   ├── HomepageScreen.tsx  # Main homepage (Grab-inspired)
+│   ├── SearchScreen.tsx
+│   ├── CartScreen.tsx
+│   └── ProfileScreen.tsx
+├── navigation/             # Navigation setup
+│   ├── AppNavigator.tsx   # Stack navigator
+│   └── MainTabNavigator.tsx # Bottom tab navigator
+├── services/              # Services layer
+│   ├── api.ts            # API client & methods
+│   └── mockData.ts       # Mock product data
+├── store/                # State management
+│   └── authStore.ts      # Zustand auth store
+├── types/                # TypeScript types
+│   ├── api.ts           # API types
+│   └── navigation.ts    # Navigation types
+├── assets/              # Images, fonts
+├── global.css          # NativeWind global styles
+└── App.tsx            # Main app component
 ```
 
 ## 🔌 API Integration
@@ -241,7 +262,27 @@ npm start -- --clear
 npx react-native start --reset-cache
 ```
 
-## Demo Giao diện
+## 📸 Demo Giao diện
+
+### 🏠 Trang chủ (Grab-inspired UI)
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="screenshots/homepage-full.png" width="280" />
+      <br />
+    </td>
+    <td align="center">
+      <img src="screenshots/homepage-full-2.png" width="280" />
+      <br />
+    </td>
+  </tr>
+</table>
+<div align="center">
+  <em>Giao diện trang chủ với Grab-inspired design</em>
+</div>
+
+### 🔐 Authentication Flow
+
 <table align="center">
   <tr>
     <td align="center">
@@ -250,14 +291,6 @@ npx react-native start --reset-cache
       <em>Màn hình loading</em>
     </td>
     <td align="center">
-      <img src="screenshots/homePage.png" width="280" />
-      <br />
-      <em>Giao diện trang chủ giới thiệu bản thân</em>
-    </td>
-  </tr>
-
-  <tr>
-    <td align="center">
       <img src="screenshots/welcome.png" width="280" />
       <br />
       <em>Màn hình Welcome</em>
@@ -265,45 +298,57 @@ npx react-native start --reset-cache
     <td align="center">
       <img src="screenshots/loginScreen.png" width="280" />
       <br />
-      <em>Giao diện trang đăng nhập đơn giản</em>
+      <em>Giao diện đăng nhập</em>
     </td>
+  </tr>
+  <tr>
     <td align="center">
       <img src="screenshots/registerScreen.png" width="280" />
       <br />
-      <em>Giao diện trang đăng ký đơn giản</em>
+      <em>Giao diện đăng ký</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/otpScreen.png" width="280" />
+      <br />
+      <em>Nhập mã OTP</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/emailScreen.png" width="280" />
+      <br />
+      <em>Email OTP được gửi</em>
     </td>
   </tr>
   <tr>
     <td align="center">
       <img src="screenshots/forgotScreen.png" width="280" />
       <br />
-      <em>Giao diện quên mật khẩu</em>
+      <em>Quên mật khẩu</em>
     </td>
-    <td align="center">
-      <img src="screenshots/otpScreen.png" width="280" />
-      <br />
-      <em>Giao diện trang nhập mã OTP</em>
-    </td>
-    <td align="center">
-      <img src="screenshots/emailScreen.png" width="280" />
-      <br />
-      <em>Giao diện Email được gửi đi</em>
-    </td>
-  </tr>
-  <tr>
     <td align="center">
       <img src="screenshots/resetPass.png" width="280" />
       <br />
-      <em>Giao diện đặt lại mật khẩu sau khi xác thực OTP</em>
+      <em>Đặt lại mật khẩu</em>
     </td>
   </tr>
-
 </table>
 
 
 ## 📝 Changelog
 
-### Version 2.0.0 (Latest)
+### Version 3.0.0 (Latest)
+
+- ✅ **NEW**: Grab-inspired Homepage UI với modern design
+- ✅ **NEW**: Modular component architecture (6 reusable components)
+- ✅ **NEW**: NativeWind (Tailwind CSS) integration
+- ✅ **NEW**: User Profile Modal với thông tin chi tiết
+- ✅ **NEW**: Custom Bottom Tab Bar với animations
+- ✅ **NEW**: Product sections với real images
+- ✅ **NEW**: Service Grid 4x2 layout
+- ✅ **NEW**: Promotional banner component
+- ✅ **IMPROVED**: Status bar styling (green background)
+- ✅ **IMPROVED**: Code organization và maintainability
+
+### Version 2.0.0
 
 - ✅ **NEW**: TypeScript integration hoàn chỉnh
 - ✅ **NEW**: JWT Authentication với Access & Refresh tokens

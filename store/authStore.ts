@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../services/api';
 import { User } from '../types/api';
+import { RealmService } from '../services/realm';
 
 interface AuthState {
   user: User | null;
@@ -22,7 +23,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (token: string, user: User) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      await RealmService.saveUser(user);
       set({ 
         token, 
         user, 
@@ -38,7 +39,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-      await AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA);
+      await RealmService.clearUserData();
       set({ 
         token: null, 
         user: null, 
@@ -54,10 +55,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ isLoading: true });
       const token = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-      const userStr = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
+      const user = await RealmService.getUser();
       
-      if (token && userStr) {
-        const user = JSON.parse(userStr);
+      if (token && user) {
         set({ 
           token, 
           user, 
