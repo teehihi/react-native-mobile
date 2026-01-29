@@ -11,17 +11,25 @@
 - **Quên mật khẩu** với OTP verification
 - **Đặt lại mật khẩu** an toàn
 - **Session management** tự động
+- **Profile Security** với JWT-OTP cho mọi thay đổi quan trọng
+- **Đổi mật khẩu** với OTP verification
+- **Đổi email** với OTP gửi về email hiện tại (bảo mật cao)
+- **Đổi số điện thoại** với OTP verification
+- **Avatar upload** với image picker và validation
 
 ### 🎨 Giao diện người dùng
 
 - **Grab-inspired Homepage** với UI/UX hiện đại
 - **Modular Component Architecture** dễ bảo trì
 - **Custom OTP Input** với animation đẹp mắt
-- **User Profile Modal** với thông tin chi tiết
+- **Profile Management** hoàn chỉnh với inline editing
+- **Avatar Upload** với camera icon overlay
 - **Product Cards** với hình ảnh và giảm giá
 - **Service Grid** 4x2 cho danh mục sản phẩm
+- **Custom Tab Bar** với animations
 - **Responsive design** tương thích đa thiết bị
 - **Loading states** và error handling
+- **Logout functionality** với confirmation dialog
 
 ### 🛠 Công nghệ sử dụng
 
@@ -119,18 +127,31 @@ BaiTapCaNhan/
 │   ├── PromoBanner.tsx     # Promotional banner
 │   ├── RecommendationSection.tsx # Product recommendations
 │   └── UserProfileModal.tsx # User profile popup
-├── screens/                # App screens
-│   ├── IntroScreen.tsx
-│   ├── WelcomeScreen.tsx
-│   ├── LoginScreen.tsx
-│   ├── RegisterScreen.tsx
-│   ├── ForgotPasswordScreen.tsx
-│   ├── OTPVerificationScreen.tsx
-│   ├── ResetPasswordScreen.tsx
-│   ├── HomepageScreen.tsx  # Main homepage (Grab-inspired)
-│   ├── SearchScreen.tsx
-│   ├── CartScreen.tsx
-│   └── ProfileScreen.tsx
+├── screens/                # App screens (Feature-based organization)
+│   ├── index.ts           # Central export file
+│   ├── onboarding/        # Onboarding & intro screens
+│   │   ├── index.ts
+│   │   ├── IntroScreen.tsx
+│   │   └── WelcomeScreen.tsx
+│   ├── auth/              # Authentication screens
+│   │   ├── index.ts
+│   │   ├── LoginScreen.tsx
+│   │   ├── RegisterScreen.tsx
+│   │   ├── ForgotPasswordScreen.tsx
+│   │   ├── OTPVerificationScreen.tsx
+│   │   └── ResetPasswordScreen.tsx
+│   ├── main/              # Main app screens
+│   │   ├── index.ts
+│   │   ├── HomepageScreen.tsx    # Main homepage (Grab-inspired)
+│   │   ├── SearchScreen.tsx
+│   │   └── CartScreen.tsx
+│   └── profile/           # Profile management screens
+│       ├── index.ts
+│       ├── AccountScreen.tsx     # Account management with logout
+│       ├── ProfileScreen.tsx     # Profile management with inline editing
+│       ├── ChangePasswordScreen.tsx # Change password with OTP
+│       ├── ChangeEmailScreen.tsx    # Change email with OTP
+│       └── ChangePhoneScreen.tsx    # Change phone with OTP
 ├── navigation/             # Navigation setup
 │   ├── AppNavigator.tsx   # Stack navigator
 │   └── MainTabNavigator.tsx # Bottom tab navigator
@@ -159,6 +180,7 @@ BaiTapCaNhan/
 ### API Endpoints
 
 ```
+# Authentication
 POST /api/auth/register              # Đăng ký (legacy)
 POST /api/auth/send-registration-otp # Gửi OTP đăng ký
 POST /api/auth/verify-registration-otp # Xác thực OTP đăng ký
@@ -166,6 +188,19 @@ POST /api/auth/login                 # Đăng nhập
 POST /api/auth/send-password-reset-otp # Gửi OTP reset password
 POST /api/auth/reset-password-otp    # Reset password với OTP
 POST /api/auth/logout               # Đăng xuất
+
+# Profile Management
+GET  /api/profile                   # Lấy thông tin profile
+PATCH /api/profile                  # Cập nhật thông tin cơ bản
+POST /api/profile/avatar            # Upload avatar
+POST /api/profile/password/send-otp # Gửi OTP đổi mật khẩu
+POST /api/profile/password/verify-otp # Xác thực OTP đổi mật khẩu
+POST /api/profile/email/send-otp    # Gửi OTP đổi email
+POST /api/profile/email/verify-otp  # Xác thực OTP đổi email
+POST /api/profile/phone/send-otp    # Gửi OTP đổi số điện thoại
+POST /api/profile/phone/verify-otp  # Xác thực OTP đổi số điện thoại
+
+# System
 GET  /api/health                   # Health check
 ```
 
@@ -216,6 +251,15 @@ EMAIL_PASS=your-app-password
 3. Nhập mã OTP 6 số
 4. Nhập mật khẩu mới
 5. Xác nhận mật khẩu → Cập nhật thành công
+
+### Quản lý Profile
+
+1. **Cập nhật thông tin cơ bản**: Chỉnh sửa tên trực tiếp (inline editing)
+2. **Upload avatar**: Chọn ảnh từ thư viện với camera icon overlay
+3. **Đổi mật khẩu**: Nhập mật khẩu hiện tại → Gửi OTP → Xác thực → Cập nhật
+4. **Đổi email**: Nhập email mới → OTP gửi về email hiện tại → Xác thực → Cập nhật
+5. **Đổi số điện thoại**: Nhập số mới → Gửi OTP → Xác thực → Cập nhật
+6. **Đăng xuất**: Confirmation dialog → Xóa session → Về màn hình Welcome
 
 ## 🧪 Testing
 
@@ -270,18 +314,28 @@ npx react-native start --reset-cache
     <td align="center">
       <img src="screenshots/homepage-full.png" width="280" />
       <br />
+      <em>Trang chủ - Phần trên</em>
     </td>
     <td align="center">
       <img src="screenshots/homepage-full-2.png" width="280" />
       <br />
+      <em>Trang chủ - Phần dưới</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/homePage.png" width="280" />
+      <br />
+      <em>Trang chủ - Tổng quan</em>
     </td>
   </tr>
 </table>
+
 <div align="center">
-  <em>Giao diện trang chủ với Grab-inspired design</em>
+  <em>🎨 Giao diện trang chủ với Grab-inspired design, bao gồm header tìm kiếm, service grid, product sections và promotional banners</em>
 </div>
 
-### 🔐 Authentication Flow
+---
+
+### 🔐 Authentication Flow (JWT + OTP)
 
 <table align="center">
   <tr>
@@ -298,24 +352,24 @@ npx react-native start --reset-cache
     <td align="center">
       <img src="screenshots/loginScreen.png" width="280" />
       <br />
-      <em>Giao diện đăng nhập</em>
+      <em>Đăng nhập với JWT</em>
     </td>
   </tr>
   <tr>
     <td align="center">
       <img src="screenshots/registerScreen.png" width="280" />
       <br />
-      <em>Giao diện đăng ký</em>
+      <em>Đăng ký tài khoản</em>
     </td>
     <td align="center">
       <img src="screenshots/otpScreen.png" width="280" />
       <br />
-      <em>Nhập mã OTP</em>
+      <em>Xác thực OTP 6 số</em>
     </td>
     <td align="center">
       <img src="screenshots/emailScreen.png" width="280" />
       <br />
-      <em>Email OTP được gửi</em>
+      <em>Email OTP nhận được</em>
     </td>
   </tr>
   <tr>
@@ -332,10 +386,122 @@ npx react-native start --reset-cache
   </tr>
 </table>
 
+<div align="center">
+  <em>🔒 Hệ thống xác thực hoàn chỉnh với JWT tokens và OTP verification qua email</em>
+</div>
+
+---
+
+### 👤 Profile Management System
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
+        <em style="color: #6b7280;">Account Screen<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Trang tài khoản</em>
+    </td>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
+        <em style="color: #6b7280;">Profile Screen<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Hồ sơ cá nhân</em>
+    </td>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
+        <em style="color: #6b7280;">Avatar Upload<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Cập nhật avatar</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
+        <em style="color: #6b7280;">Change Password<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Đổi mật khẩu</em>
+    </td>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
+        <em style="color: #6b7280;">Change Email<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Đổi email</em>
+    </td>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
+        <em style="color: #6b7280;">Change Phone<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Đổi số điện thoại</em>
+    </td>
+  </tr>
+</table>
+
+<div align="center">
+  <em>👤 Hệ thống quản lý profile hoàn chỉnh với avatar upload, inline name editing và JWT-OTP security cho tất cả thay đổi</em>
+</div>
+
+---
+
+### 🔐 Security Features (JWT + OTP)
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #fef3c7; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #f59e0b;">
+        <em style="color: #92400e;">OTP Email<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Email OTP cho đổi mật khẩu</em>
+    </td>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #fef3c7; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #f59e0b;">
+        <em style="color: #92400e;">OTP Verification<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Xác thực OTP đổi email</em>
+    </td>
+    <td align="center">
+      <div style="width: 280px; height: 500px; background: #fef3c7; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #f59e0b;">
+        <em style="color: #92400e;">Success Message<br/>Screenshot</em>
+      </div>
+      <br />
+      <em>Thông báo thành công</em>
+    </td>
+  </tr>
+</table>
+
+<div align="center">
+  <em>🛡️ Bảo mật cao với JWT tokens và OTP verification cho mọi thay đổi profile quan trọng</em>
+</div>
+
 
 ## 📝 Changelog
 
-### Version 3.0.0 (Latest)
+### Version 4.0.0 (Latest) - Profile Management System
+
+- ✅ **NEW**: Complete Profile Management System
+- ✅ **NEW**: JWT-OTP Security cho tất cả profile changes
+- ✅ **NEW**: Separate screens cho password/email/phone changes
+- ✅ **NEW**: Avatar upload với camera icon overlay
+- ✅ **NEW**: Inline name editing với save/cancel buttons
+- ✅ **NEW**: Account screen với logout functionality
+- ✅ **NEW**: OTP verification cho profile security
+- ✅ **NEW**: Email changes gửi OTP về email hiện tại (security best practice)
+- ✅ **NEW**: Feature-based folder structure (screens/auth, screens/profile, etc.)
+- ✅ **NEW**: Centralized exports với index.ts files
+- ✅ **IMPROVED**: Navigation flow với ProfileStack
+- ✅ **IMPROVED**: UI/UX consistency across all screens
+- ✅ **IMPROVED**: Error handling và loading states
+- ✅ **IMPROVED**: Code organization và maintainability
+
+### Version 3.0.0
 
 - ✅ **NEW**: Grab-inspired Homepage UI với modern design
 - ✅ **NEW**: Modular component architecture (6 reusable components)

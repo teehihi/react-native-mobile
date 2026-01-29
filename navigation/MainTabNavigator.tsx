@@ -1,14 +1,16 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomepageScreen from '../screens/HomepageScreen';
-import SearchScreen from '../screens/SearchScreen';
-import CartScreen from '../screens/CartScreen';
-import AccountScreen from '../screens/AccountScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import ChangePasswordScreen from '../screens/ChangePasswordScreen';
-import ChangeEmailScreen from '../screens/ChangeEmailScreen';
-import ChangePhoneScreen from '../screens/ChangePhoneScreen';
+import { 
+  HomepageScreen, 
+  SearchScreen, 
+  CartScreen,
+  AccountScreen,
+  ProfileScreen,
+  ChangePasswordScreen,
+  ChangeEmailScreen,
+  ChangePhoneScreen 
+} from '../screens';
 import { CustomTabBar } from '../components/CustomTabBar';
 
 const Tab = createBottomTabNavigator();

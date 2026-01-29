@@ -13,10 +13,10 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
-import { ApiService } from '../services/api';
-import { theme } from '../constants/theme';
-import { OTPInput, OTPInputRef } from '../components/OTPInput';
+import { RootStackParamList } from '../../types/navigation';
+import { ApiService } from '../../services/api';
+import { theme } from '../../constants/theme';
+import { OTPInput, OTPInputRef } from '../../components/OTPInput';
 
 type OTPVerificationScreenRouteProp = RouteProp<RootStackParamList, 'OTPVerification'>;
 type OTPVerificationScreenNavigationProp = StackNavigationProp<RootStackParamList, 'OTPVerification'>;

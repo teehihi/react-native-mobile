@@ -7,8 +7,8 @@ import {
   Animated,
   Text,
 } from 'react-native';
-import { NavigationProps } from '../types/navigation';
-import { ApiService } from '../services/api';
+import { NavigationProps } from '../../types/navigation';
+import { ApiService } from '../../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -72,7 +72,7 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ navigation }) => {
       <Animated.View style={[styles.logoContainer, { opacity: fadeAnim }]}>
         <View style={styles.logoWrapper}>
           <Image
-            source={require('../assets/dacsanvietLogo.webp')}
+            source={require('../../assets/dacsanvietLogo.webp')}
             style={styles.logo}
             resizeMode="contain"
           />

@@ -8,8 +8,8 @@ import {
   Dimensions,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { NavigationProps } from '../types/navigation';
-import { theme } from '../constants/theme';
+import { NavigationProps } from '../../types/navigation';
+import { theme } from '../../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,7 +22,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Image
-            source={require('../assets/dacsanvietLogo.webp')}
+            source={require('../../assets/dacsanvietLogo.webp')}
             style={styles.logo}
             resizeMode="contain"
           />

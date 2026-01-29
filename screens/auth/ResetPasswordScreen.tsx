@@ -14,10 +14,10 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
-import { ApiService } from '../services/api';
-import { theme } from '../constants/theme';
-import { validatePassword } from '../utils/validation';
+import { RootStackParamList } from '../../types/navigation';
+import { ApiService } from '../../services/api';
+import { theme } from '../../constants/theme';
+import { validatePassword } from '../../utils/validation';
 
 type ResetPasswordScreenRouteProp = RouteProp<RootStackParamList, 'ResetPassword'>;
 type ResetPasswordScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ResetPassword'>;

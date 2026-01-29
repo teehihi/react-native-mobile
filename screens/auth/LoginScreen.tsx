@@ -13,11 +13,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
-import { NavigationProps } from '../types/navigation';
-import { ApiService } from '../services/api';
-import { theme } from '../constants/theme';
-import { useAuth } from '../hooks/useAuth';
-import { sanitizeInput } from '../utils/validation';
+import { NavigationProps } from '../../types/navigation';
+import { ApiService } from '../../services/api';
+import { theme } from '../../constants/theme';
+import { useAuth } from '../../hooks/useAuth';
+import { sanitizeInput } from '../../utils/validation';
 
 interface LoginScreenProps extends NavigationProps {}
 

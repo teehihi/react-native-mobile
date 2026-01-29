@@ -13,16 +13,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { ApiService } from '../services/api';
-import { User } from '../types/api';
+import { ApiService } from '../../services/api';
+import { User } from '../../types/api';
 
-interface ChangePhoneScreenProps {
+interface ChangeEmailScreenProps {
   navigation: any;
 }
 
-const ChangePhoneScreen: React.FC<ChangePhoneScreenProps> = ({ navigation }) => {
+const ChangeEmailScreen: React.FC<ChangeEmailScreenProps> = ({ navigation }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [newPhone, setNewPhone] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,31 +41,31 @@ const ChangePhoneScreen: React.FC<ChangePhoneScreenProps> = ({ navigation }) => 
   };
 
   const handleSendOTP = async () => {
-    if (!newPhone) {
-      Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại mới');
+    if (!newEmail) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email mới');
       return;
     }
 
-    if (newPhone.length < 10) {
-      Alert.alert('Lỗi', 'Số điện thoại không hợp lệ');
+    if (!newEmail.includes('@')) {
+      Alert.alert('Lỗi', 'Email không hợp lệ');
       return;
     }
 
-    if (newPhone === user?.phoneNumber) {
-      Alert.alert('Lỗi', 'Số điện thoại mới phải khác số điện thoại hiện tại');
+    if (newEmail.toLowerCase() === user?.email?.toLowerCase()) {
+      Alert.alert('Lỗi', 'Email mới phải khác email hiện tại');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await ApiService.sendPhoneUpdateOTP(newPhone);
+      const response = await ApiService.sendEmailUpdateOTP(newEmail);
       if (response.success) {
         // Navigate to OTP verification screen
         navigation.navigate('OTPVerification', {
           email: user?.email || '', // Current email (where OTP was sent)
-          purpose: 'phone_update',
-          phoneData: {
-            newPhone,
+          purpose: 'email_update',
+          emailData: {
+            newEmail,
             otpToken: response.data?.otpToken,
           },
         });
@@ -94,7 +94,7 @@ const ChangePhoneScreen: React.FC<ChangePhoneScreenProps> = ({ navigation }) => 
           >
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đổi số điện thoại</Text>
+          <Text style={styles.headerTitle}>Đổi email</Text>
           <View style={styles.headerRight} />
         </View>
 
@@ -104,26 +104,25 @@ const ChangePhoneScreen: React.FC<ChangePhoneScreenProps> = ({ navigation }) => 
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.form}>
-            {/* Current Phone */}
+            {/* Current Email */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Số điện thoại hiện tại</Text>
-              <View style={styles.currentPhoneContainer}>
-                <Text style={styles.currentPhoneText}>
-                  {user?.phoneNumber || 'Chưa có số điện thoại'}
-                </Text>
+              <Text style={styles.label}>Email hiện tại</Text>
+              <View style={styles.currentEmailContainer}>
+                <Text style={styles.currentEmailText}>{user?.email}</Text>
               </View>
             </View>
 
-            {/* New Phone */}
+            {/* New Email */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Số điện thoại mới</Text>
+              <Text style={styles.label}>Email mới</Text>
               <TextInput
                 style={styles.input}
-                value={newPhone}
-                onChangeText={setNewPhone}
-                placeholder="Nhập số điện thoại mới"
+                value={newEmail}
+                onChangeText={setNewEmail}
+                placeholder="Nhập email mới"
                 placeholderTextColor="#9ca3af"
-                keyboardType="phone-pad"
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
             </View>
 
@@ -144,9 +143,9 @@ const ChangePhoneScreen: React.FC<ChangePhoneScreenProps> = ({ navigation }) => 
             <View style={styles.tipsContainer}>
               <Text style={styles.tipsTitle}>Lưu ý bảo mật:</Text>
               <Text style={styles.tipText}>• Mã OTP sẽ được gửi đến email hiện tại của bạn</Text>
-              <Text style={styles.tipText}>• Số điện thoại mới phải khác số điện thoại hiện tại</Text>
-              <Text style={styles.tipText}>• Đảm bảo số điện thoại mới chính xác</Text>
-              <Text style={styles.tipText}>• Số điện thoại dùng để khôi phục tài khoản</Text>
+              <Text style={styles.tipText}>• Email mới phải khác email hiện tại</Text>
+              <Text style={styles.tipText}>• Đảm bảo email mới chính xác và bạn có thể truy cập</Text>
+              <Text style={styles.tipText}>• Sau khi đổi email, bạn sẽ đăng nhập bằng email mới</Text>
             </View>
           </View>
         </ScrollView>
@@ -209,14 +208,14 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginBottom: 8,
   },
-  currentPhoneContainer: {
+  currentEmailContainer: {
     padding: 12,
     backgroundColor: '#f3f4f6',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#d1d5db',
   },
-  currentPhoneText: {
+  currentEmailText: {
     fontSize: 16,
     color: '#6b7280',
   },
@@ -265,4 +264,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChangePhoneScreen;
+export default ChangeEmailScreen;

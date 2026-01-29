@@ -13,10 +13,11 @@ import {
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
-import { ApiService } from '../services/api';
-import { theme } from '../constants/theme';
-import { validateEmail } from '../utils/validation';
+import { NavigationProps } from '../../types/navigation';
+import { RootStackParamList } from '../../types/navigation';
+import { ApiService } from '../../services/api';
+import { theme } from '../../constants/theme';
+import { validateEmail } from '../../utils/validation';
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 

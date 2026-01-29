@@ -14,8 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect } from '@react-navigation/native';
-import { ApiService } from '../services/api';
-import { User } from '../types/api';
+import { ApiService } from '../../services/api';
+import { User } from '../../types/api';
 import { API_HOST_REAL_DEVICE, API_PORT } from '@env';
 
 interface ProfileScreenProps {

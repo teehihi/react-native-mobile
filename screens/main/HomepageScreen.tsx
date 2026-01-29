@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { ScrollView, RefreshControl, Alert, StatusBar, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '../store/authStore';
-import { ApiService } from '../services/api';
-import { NavigationProps } from '../types/navigation';
-import { PRODUCTS } from '../services/mockData';
-import { HomepageHeader } from '../components/HomepageHeader';
-import { ServiceGrid } from '../components/ServiceGrid';
-import { ProductSection } from '../components/ProductSection';
-import { PromoBanner } from '../components/PromoBanner';
-import { RecommendationSection } from '../components/RecommendationSection';
+import { useAuthStore } from '../../store/authStore';
+import { ApiService } from '../../services/api';
+import { NavigationProps } from '../../types/navigation';
+import { PRODUCTS } from '../../services/mockData';
+import { HomepageHeader } from '../../components/HomepageHeader';
+import { ServiceGrid } from '../../components/ServiceGrid';
+import { ProductSection } from '../../components/ProductSection';
+import { PromoBanner } from '../../components/PromoBanner';
+import { RecommendationSection } from '../../components/RecommendationSection';
 
 interface HomepageScreenProps extends NavigationProps {}
 

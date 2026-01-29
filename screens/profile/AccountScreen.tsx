@@ -13,8 +13,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuthStore } from '../store/authStore';
-import { ApiService } from '../services/api';
+import { useAuthStore } from '../../store/authStore';
+import { ApiService } from '../../services/api';
 import { API_HOST_REAL_DEVICE, API_PORT } from '@env';
 
 interface AccountScreenProps {
@@ -207,8 +207,8 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
           <View style={styles.menuCard}>
             <MenuItem
               icon="gift"
-              title="GrabXu"
-              badge="245 GrabXu"
+              title="DacSanVietXu"
+              badge="245 DacSanVietXu"
               onPress={() => {}}
             />
             <MenuItem

@@ -13,10 +13,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
-import { NavigationProps } from '../types/navigation';
-import { ApiService } from '../services/api';
-import { theme } from '../constants/theme';
-import { sanitizeInput, validateEmail, validatePassword } from '../utils/validation';
+import { NavigationProps } from '../../types/navigation';
+import { ApiService } from '../../services/api';
+import { theme } from '../../constants/theme';
+import { sanitizeInput, validateEmail, validatePassword } from '../../utils/validation';
 
 interface RegisterScreenProps extends NavigationProps {}
 

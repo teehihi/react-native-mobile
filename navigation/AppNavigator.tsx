@@ -3,14 +3,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 
-import IntroScreen from '../screens/IntroScreen';
-import WelcomeScreen from '../screens/WelcomeScreen';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import OTPVerificationScreen from '../screens/OTPVerificationScreen';
-import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
-import ResetPasswordScreen from '../screens/ResetPasswordScreen';
-import HomepageScreen from '../screens/HomepageScreen'; // Keep for type ref if needed, but unused in stack if replaced
+import { 
+  IntroScreen, 
+  WelcomeScreen, 
+  LoginScreen, 
+  RegisterScreen, 
+  ForgotPasswordScreen, 
+  OTPVerificationScreen, 
+  ResetPasswordScreen 
+} from '../screens';
 import { MainTabNavigator } from './MainTabNavigator';
 import { RootStackParamList } from '../types/navigation';
 import { useAuth } from '../hooks/useAuth';
