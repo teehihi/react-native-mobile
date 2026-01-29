@@ -7,8 +7,21 @@ export type RootStackParamList = {
   Register: undefined;
   OTPVerification: {
     email: string;
-    purpose: 'registration' | 'password_reset';
+    purpose: 'registration' | 'password_reset' | 'password_change' | 'email_update' | 'phone_update';
     userData?: RegisterRequest;
+    passwordData?: {
+      currentPassword: string;
+      newPassword: string;
+      otpToken?: string;
+    };
+    emailData?: {
+      newEmail: string;
+      otpToken?: string;
+    };
+    phoneData?: {
+      newPhone: string;
+      otpToken?: string;
+    };
   };
   ForgotPassword: undefined;
   ResetPassword: {
@@ -16,6 +29,10 @@ export type RootStackParamList = {
     otpCode: string;
   };
   Homepage: undefined;
+  ProfileEdit: undefined;
+  ChangePassword: undefined;
+  ChangeEmail: undefined;
+  ChangePhone: undefined;
 };
 
 export type NavigationProps = {

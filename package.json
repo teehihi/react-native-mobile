@@ -27,6 +27,7 @@
     "babel-preset-expo": "^54.0.10",
     "d3-shape": "^3.2.0",
     "expo": "^54.0.32",
+    "expo-image-picker": "^17.0.10",
     "expo-linear-gradient": "~15.0.8",
     "expo-status-bar": "~3.0.9",
     "nativewind": "^4.2.1",

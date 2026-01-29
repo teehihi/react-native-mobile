@@ -4,6 +4,7 @@ export interface User {
   email: string;
   fullName: string;
   phoneNumber?: string | null;
+  avatarUrl?: string | null;
   role: 'ADMIN' | 'STAFF' | 'USER';
   isActive: boolean;
   createdAt: string;
@@ -102,4 +103,24 @@ export interface SendOTPResponse {
   email: string;
   expiresAt: string;
   expiresIn: string;
+}
+
+export interface UpdateProfileRequest {
+  fullName: string;
+  phoneNumber?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface UpdateEmailRequest {
+  newEmail: string;
+  otpCode?: string;
+}
+
+export interface UpdatePhoneRequest {
+  newPhone: string;
+  otpCode?: string;
 }

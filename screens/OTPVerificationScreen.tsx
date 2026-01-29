@@ -27,7 +27,7 @@ interface Props {
 }
 
 const OTPVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
-  const { email, purpose, userData } = route.params;
+  const { email, purpose, userData, passwordData, emailData, phoneData } = route.params;
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -132,6 +132,85 @@ const OTPVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
           email,
           otpCode: codeToVerify,
         });
+      } else if (purpose === 'password_change' && passwordData) {
+        // Verify password change OTP
+        const response = await ApiService.verifyPasswordChangeOTP(
+          passwordData.currentPassword,
+          passwordData.newPassword,
+          codeToVerify,
+          passwordData.otpToken || ''
+        );
+
+        if (response.success) {
+          Alert.alert(
+            'Thành công',
+            'Đổi mật khẩu thành công!',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Homepage' }],
+                }),
+              },
+            ]
+          );
+        } else {
+          Alert.alert('Lỗi', response.message);
+          setOtpError(true);
+        }
+      } else if (purpose === 'email_update' && emailData) {
+        // Verify email update OTP
+        const response = await ApiService.verifyEmailUpdate(
+          emailData.newEmail,
+          codeToVerify,
+          emailData.otpToken || ''
+        );
+
+        if (response.success) {
+          Alert.alert(
+            'Thành công',
+            'Đổi email thành công!',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Homepage' }],
+                }),
+              },
+            ]
+          );
+        } else {
+          Alert.alert('Lỗi', response.message);
+          setOtpError(true);
+        }
+      } else if (purpose === 'phone_update' && phoneData) {
+        // Verify phone update OTP
+        const response = await ApiService.verifyPhoneUpdate(
+          phoneData.newPhone,
+          codeToVerify,
+          phoneData.otpToken || ''
+        );
+
+        if (response.success) {
+          Alert.alert(
+            'Thành công',
+            'Đổi số điện thoại thành công!',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Homepage' }],
+                }),
+              },
+            ]
+          );
+        } else {
+          Alert.alert('Lỗi', response.message);
+          setOtpError(true);
+        }
       }
     } catch (error) {
       Alert.alert('Lỗi', 'Có lỗi xảy ra. Vui lòng thử lại.');
@@ -153,11 +232,17 @@ const OTPVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
           email,
           fullName: userData?.fullName,
         });
-      } else {
+      } else if (purpose === 'password_reset') {
         response = await ApiService.sendPasswordResetOTP({ email });
+      } else if (purpose === 'password_change' && passwordData) {
+        response = await ApiService.sendPasswordChangeOTP(passwordData.currentPassword);
+      } else if (purpose === 'email_update' && emailData) {
+        response = await ApiService.sendEmailUpdateOTP(emailData.newEmail);
+      } else if (purpose === 'phone_update' && phoneData) {
+        response = await ApiService.sendPhoneUpdateOTP(phoneData.newPhone);
       }
 
-      if (response.success) {
+      if (response?.success) {
         Alert.alert('Thành công', 'Mã OTP mới đã được gửi đến email của bạn');
         setCountdown(300);
         setCanResend(false);
@@ -166,7 +251,7 @@ const OTPVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
         // Reset OTP input
         otpInputRef.current?.reset();
       } else {
-        Alert.alert('Lỗi', response.message);
+        Alert.alert('Lỗi', response?.message || 'Không thể gửi lại OTP');
       }
     } catch (error) {
       Alert.alert('Lỗi', 'Có lỗi xảy ra khi gửi lại OTP');
@@ -176,13 +261,31 @@ const OTPVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   const getTitle = () => {
-    return purpose === 'registration' ? 'Xác thực đăng ký' : 'Xác thực đặt lại mật khẩu';
+    if (purpose === 'registration') return 'Xác thực đăng ký';
+    if (purpose === 'password_reset') return 'Xác thực đặt lại mật khẩu';
+    if (purpose === 'password_change') return 'Xác thực đổi mật khẩu';
+    if (purpose === 'email_update') return 'Xác thực đổi email';
+    if (purpose === 'phone_update') return 'Xác thực đổi số điện thoại';
+    return 'Xác thực OTP';
   };
 
   const getDescription = () => {
-    return purpose === 'registration'
-      ? 'Vui lòng nhập mã OTP đã được gửi đến email để hoàn tất đăng ký tài khoản'
-      : 'Vui lòng nhập mã OTP đã được gửi đến email để đặt lại mật khẩu';
+    if (purpose === 'registration') {
+      return 'Vui lòng nhập mã OTP đã được gửi đến email để hoàn tất đăng ký tài khoản';
+    }
+    if (purpose === 'password_reset') {
+      return 'Vui lòng nhập mã OTP đã được gửi đến email để đặt lại mật khẩu';
+    }
+    if (purpose === 'password_change') {
+      return 'Vui lòng nhập mã OTP đã được gửi đến email để xác nhận đổi mật khẩu';
+    }
+    if (purpose === 'email_update') {
+      return 'Vui lòng nhập mã OTP đã được gửi đến email hiện tại để xác nhận đổi email';
+    }
+    if (purpose === 'phone_update') {
+      return 'Vui lòng nhập mã OTP đã được gửi đến email để xác nhận đổi số điện thoại';
+    }
+    return 'Vui lòng nhập mã OTP đã được gửi đến email của bạn';
   };
 
   return (

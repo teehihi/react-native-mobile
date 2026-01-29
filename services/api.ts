@@ -480,4 +480,234 @@ export class ApiService {
       };
     }
   }
+
+  // --- Profile Management APIs ---
+
+  // Get current user profile
+  static async getProfile(): Promise<ApiResponse<{ user: User }>> {
+    try {
+      const response = await apiClient.get<ApiResponse<{ user: User }>>('/profile');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Update basic profile info
+  static async updateProfile(data: { fullName: string; phoneNumber?: string }): Promise<ApiResponse<{ user: User }>> {
+    try {
+      const response = await apiClient.patch<ApiResponse<{ user: User }>>('/profile', data);
+      
+      // Update stored user data
+      if (response.data.success && response.data.data) {
+        await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.data.data.user));
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Upload avatar
+  static async uploadAvatar(imageUri: string): Promise<ApiResponse<{ user: User; avatarUrl: string }>> {
+    try {
+      const formData = new FormData();
+      
+      // Extract filename from URI
+      const filename = imageUri.split('/').pop() || 'avatar.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+      // @ts-ignore - FormData append with file object
+      formData.append('avatar', {
+        uri: imageUri,
+        name: filename,
+        type: type,
+      });
+
+      const response = await apiClient.post<ApiResponse<{ user: User; avatarUrl: string }>>(
+        '/profile/avatar',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Update stored user data
+      if (response.data.success && response.data.data) {
+        await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.data.data.user));
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Change password
+  static async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>('/profile/change-password', {
+        currentPassword,
+        newPassword,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Send OTP for password change
+  static async sendPasswordChangeOTP(currentPassword: string): Promise<ApiResponse<SendOTPResponse & { otpToken: string }>> {
+    try {
+      const response = await apiClient.post<ApiResponse<SendOTPResponse & { otpToken: string }>>('/profile/password/send-otp', {
+        currentPassword,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Verify OTP and change password
+  static async verifyPasswordChangeOTP(currentPassword: string, newPassword: string, otpCode: string, otpToken: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>('/profile/password/verify-otp', {
+        currentPassword,
+        newPassword,
+        otpCode,
+        otpToken,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Send OTP for email update
+  static async sendEmailUpdateOTP(newEmail: string): Promise<ApiResponse<SendOTPResponse & { otpToken: string }>> {
+    try {
+      const response = await apiClient.post<ApiResponse<SendOTPResponse & { otpToken: string }>>('/profile/email/send-otp', {
+        newEmail,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Verify OTP and update email
+  static async verifyEmailUpdate(newEmail: string, otpCode: string, otpToken: string): Promise<ApiResponse<{ user: User }>> {
+    try {
+      const response = await apiClient.post<ApiResponse<{ user: User }>>('/profile/email/verify-otp', {
+        newEmail,
+        otpCode,
+        otpToken,
+      });
+
+      // Update stored user data
+      if (response.data.success && response.data.data) {
+        await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.data.data.user));
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Send OTP for phone update
+  static async sendPhoneUpdateOTP(newPhone: string): Promise<ApiResponse<SendOTPResponse & { otpToken: string }>> {
+    try {
+      const response = await apiClient.post<ApiResponse<SendOTPResponse & { otpToken: string }>>('/profile/phone/send-otp', {
+        newPhone,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Verify OTP and update phone
+  static async verifyPhoneUpdate(newPhone: string, otpCode: string, otpToken: string): Promise<ApiResponse<{ user: User }>> {
+    try {
+      const response = await apiClient.post<ApiResponse<{ user: User }>>('/profile/phone/verify-otp', {
+        newPhone,
+        otpCode,
+        otpToken,
+      });
+
+      // Update stored user data
+      if (response.data.success && response.data.data) {
+        await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.data.data.user));
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
 }

@@ -8,7 +8,6 @@ import { PRODUCTS } from '../services/mockData';
 import { HomepageHeader } from '../components/HomepageHeader';
 import { ServiceGrid } from '../components/ServiceGrid';
 import { ProductSection } from '../components/ProductSection';
-import { UserProfileModal } from '../components/UserProfileModal';
 import { PromoBanner } from '../components/PromoBanner';
 import { RecommendationSection } from '../components/RecommendationSection';
 
@@ -17,31 +16,11 @@ interface HomepageScreenProps extends NavigationProps {}
 const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
   const { user, logout } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
-  const [showUserModal, setShowUserModal] = useState(false);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
-
-  const handleLogout = () => {
-    Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất?', [
-      { text: 'Hủy', style: 'cancel' },
-      {
-        text: 'Đăng xuất',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await ApiService.logout();
-            await logout();
-            navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
-          } catch (error) {
-            console.log('Logout error:', error);
-          }
-        },
-      },
-    ]);
-  };
 
   // Service grid items
   const services = [
@@ -57,7 +36,7 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView className="flex-1 bg-green-600" edges={[]}>
         <ScrollView
         showsVerticalScrollIndicator={false}
@@ -65,7 +44,7 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#16a34a" />
         }
       >
-        <HomepageHeader user={user} onAvatarPress={() => setShowUserModal(true)} />
+        <HomepageHeader user={user} onAvatarPress={() => (navigation as any).navigate('Profile')} />
         <View className="bg-gray-50 flex-1">
           <ServiceGrid services={services} />
           <PromoBanner />
@@ -74,13 +53,6 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
           <RecommendationSection products={PRODUCTS} />
         </View>
       </ScrollView>
-
-      <UserProfileModal
-        visible={showUserModal}
-        user={user}
-        onClose={() => setShowUserModal(false)}
-        onLogout={handleLogout}
-      />
       </SafeAreaView>
     </>
   );
