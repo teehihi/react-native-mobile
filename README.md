@@ -56,7 +56,7 @@
 ### 1. Clone repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/teehihi/react-native-mobile/
 cd BaiTapTuan1_TypeScript
 ```
 
