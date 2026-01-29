@@ -321,11 +321,6 @@ npx react-native start --reset-cache
       <br />
       <em>Trang chủ - Phần dưới</em>
     </td>
-    <td align="center">
-      <img src="screenshots/homePage.png" width="280" />
-      <br />
-      <em>Trang chủ - Tổng quan</em>
-    </td>
   </tr>
 </table>
 
@@ -393,50 +388,37 @@ npx react-native start --reset-cache
 ---
 
 ### 👤 Profile Management System
-
 <table align="center">
   <tr>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
-        <em style="color: #6b7280;">Account Screen<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/accountScreen.png" width="280" />
       <br />
       <em>Trang tài khoản</em>
     </td>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
-        <em style="color: #6b7280;">Profile Screen<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/infoScreen.png" width="280" />
       <br />
       <em>Hồ sơ cá nhân</em>
     </td>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
-        <em style="color: #6b7280;">Avatar Upload<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/uploadAvtScreen.png" width="280" />
       <br />
       <em>Cập nhật avatar</em>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
-        <em style="color: #6b7280;">Change Password<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/passChange.png" width="280" />
       <br />
       <em>Đổi mật khẩu</em>
     </td>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
-        <em style="color: #6b7280;">Change Email<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/emailChange.png" width="280" />
       <br />
       <em>Đổi email</em>
     </td>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #e5e7eb;">
-        <em style="color: #6b7280;">Change Phone<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/phoneChange.png" width="280" />
       <br />
       <em>Đổi số điện thoại</em>
     </td>
@@ -454,23 +436,17 @@ npx react-native start --reset-cache
 <table align="center">
   <tr>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #fef3c7; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #f59e0b;">
-        <em style="color: #92400e;">OTP Email<br/>Screenshot</em>
-      </div>
+    <img src="screenshots/passChangeOTP.png" width="280" />
       <br />
       <em>Email OTP cho đổi mật khẩu</em>
     </td>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #fef3c7; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #f59e0b;">
-        <em style="color: #92400e;">OTP Verification<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/phoneChangeOTP.png" width="280" />
       <br />
-      <em>Xác thực OTP đổi email</em>
+      <em>Xác thực OTP đổi SĐT</em>
     </td>
     <td align="center">
-      <div style="width: 280px; height: 500px; background: #fef3c7; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #f59e0b;">
-        <em style="color: #92400e;">Success Message<br/>Screenshot</em>
-      </div>
+      <img src="screenshots/successOTP.png" width="280" />
       <br />
       <em>Thông báo thành công</em>
     </td>
