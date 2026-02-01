@@ -17,9 +17,10 @@ interface Product {
 interface ProductSectionProps {
   title: string;
   products: Product[];
+  onProductPress?: (product: Product) => void;
 }
 
-export const ProductSection: React.FC<ProductSectionProps> = ({ title, products }) => {
+export const ProductSection: React.FC<ProductSectionProps> = ({ title, products, onProductPress }) => {
   return (
     <View className="mt-6">
       <View className="px-4 mb-3 flex-row justify-between items-center">
@@ -40,6 +41,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products 
             className="mr-3 bg-white rounded-2xl overflow-hidden shadow-sm"
             style={{ width: CARD_WIDTH }}
             activeOpacity={0.9}
+            onPress={() => onProductPress?.(product)}
           >
             <View className="relative">
               <Image
@@ -56,12 +58,23 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products 
                 {product.name}
               </Text>
               <Text className="text-xs text-gray-500 mb-2">0.5 km</Text>
-              <View className="flex-row items-center">
+              <View className="flex-row items-center mb-2">
                 <MaterialCommunityIcons name="tag" size={14} color="#16a34a" />
                 <Text className="text-xs text-green-700 font-semibold ml-1">
                   Giảm {product.price.toLocaleString('vi-VN')}đ
                 </Text>
               </View>
+              <TouchableOpacity 
+                className="bg-green-600 rounded-lg py-2 px-3 flex-row items-center justify-center"
+                onPress={(e) => {
+                  e.stopPropagation();
+                  console.log('Added to cart:', product);
+                }}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons name="plus" size={14} color="white" />
+                <Text className="text-white text-xs font-semibold ml-1">Thêm</Text>
+              </TouchableOpacity>
             </View>
           </TouchableOpacity>
         ))}

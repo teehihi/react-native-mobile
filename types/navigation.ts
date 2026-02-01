@@ -29,6 +29,8 @@ export type RootStackParamList = {
     otpCode: string;
   };
   Homepage: undefined;
+  Search: { initialQuery?: string };
+  ProductDetail: { product: any };
   ProfileEdit: undefined;
   ChangePassword: undefined;
   ChangeEmail: undefined;

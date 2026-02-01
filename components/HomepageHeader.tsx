@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, TouchableOpacity, Image, TextInput } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { User } from '../types/api';
@@ -10,9 +10,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 interface HomepageHeaderProps {
   user: User | null;
   onAvatarPress: () => void;
+  onSearchSubmit: (query: string) => void;
 }
 
-export const HomepageHeader: React.FC<HomepageHeaderProps> = ({ user, onAvatarPress }) => {
+export const HomepageHeader: React.FC<HomepageHeaderProps> = ({ user, onAvatarPress, onSearchSubmit }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      onSearchSubmit(searchQuery.trim());
+    }
+  };
+
   const getAvatarUrl = () => {
     if (user?.avatarUrl) {
       const host = API_HOST_REAL_DEVICE || 'localhost';
@@ -47,20 +57,41 @@ export const HomepageHeader: React.FC<HomepageHeaderProps> = ({ user, onAvatarPr
           </TouchableOpacity>
 
           {/* Search Bar */}
-          <TouchableOpacity 
-            className="flex-1 bg-white rounded-2xl flex-row items-center px-4 py-3"
-            activeOpacity={0.8}
+          <View 
+            className="flex-1 bg-white rounded-2xl flex-row items-center px-4 py-2"
             style={{
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.08,
               shadowRadius: 8,
               elevation: 3,
+              height: 40,
             }}
           >
-            <MaterialCommunityIcons name="magnify" size={22} color="#9ca3af" />
-            <Text className="ml-3 text-gray-500 text-sm font-medium">Tìm món</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={handleSearchSubmit}>
+              <MaterialCommunityIcons name="magnify" size={20} color="#9ca3af" />
+            </TouchableOpacity>
+            <TextInput
+              className="flex-1 ml-3 text-gray-700 text-sm"
+              placeholder="Tìm món"
+              placeholderTextColor="#9ca3af"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={handleSearchSubmit}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              returnKeyType="search"
+              style={{
+                fontWeight: '500',
+                height: 36,
+              }}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <MaterialCommunityIcons name="close-circle" size={18} color="#9ca3af" />
+              </TouchableOpacity>
+            )}
+          </View>
 
           {/* Rewards Icon */}
           <TouchableOpacity 

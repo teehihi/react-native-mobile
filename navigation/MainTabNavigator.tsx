@@ -5,6 +5,7 @@ import {
   HomepageScreen, 
   SearchScreen, 
   CartScreen,
+  ProductDetailScreen,
   AccountScreen,
   ProfileScreen,
   ChangePasswordScreen,
@@ -15,6 +16,27 @@ import { CustomTabBar } from '../components/CustomTabBar';
 
 const Tab = createBottomTabNavigator();
 const ProfileStack = createStackNavigator();
+const MainStack = createStackNavigator();
+
+// Main Stack Navigator (Homepage -> ProductDetail)
+const MainStackNavigator = () => {
+  return (
+    <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Screen name="HomepageMain" component={HomepageScreen} />
+      <MainStack.Screen name="ProductDetail" component={ProductDetailScreen} />
+    </MainStack.Navigator>
+  );
+};
+
+// Search Stack Navigator (Search -> ProductDetail)
+const SearchStackNavigator = () => {
+  return (
+    <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Screen name="SearchMain" component={SearchScreen} />
+      <MainStack.Screen name="ProductDetail" component={ProductDetailScreen} />
+    </MainStack.Navigator>
+  );
+};
 
 // Profile Stack Navigator (Account -> ProfileEdit -> ChangePassword/ChangeEmail/ChangePhone)
 const ProfileStackNavigator = () => {
@@ -37,8 +59,8 @@ export const MainTabNavigator = () => {
         headerShown: false,
       }}
     >
-      <Tab.Screen name="Home" component={HomepageScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
+      <Tab.Screen name="Home" component={MainStackNavigator} />
+      <Tab.Screen name="Search" component={SearchStackNavigator} />
       <Tab.Screen name="Cart" component={CartScreen} />
       <Tab.Screen name="Profile" component={ProfileStackNavigator} />
     </Tab.Navigator>

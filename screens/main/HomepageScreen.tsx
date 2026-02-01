@@ -22,6 +22,15 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
+  const handleSearchSubmit = (query: string) => {
+    // Navigate to Search screen with the query
+    navigation.navigate('Search', { initialQuery: query });
+  };
+
+  const handleProductPress = (product: any) => {
+    navigation.navigate('ProductDetail', { product });
+  };
+
   // Service grid items
   const services = [
     { id: 1, name: 'Bánh Kẹo', icon: 'candy', color: '#fbbf24' },
@@ -44,13 +53,17 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#16a34a" />
         }
       >
-        <HomepageHeader user={user} onAvatarPress={() => (navigation as any).navigate('Profile')} />
+        <HomepageHeader 
+          user={user} 
+          onAvatarPress={() => (navigation as any).navigate('Profile')}
+          onSearchSubmit={handleSearchSubmit}
+        />
         <View className="bg-gray-50 flex-1">
           <ServiceGrid services={services} />
           <PromoBanner />
-          <ProductSection title="Mua Ngay" products={PRODUCTS} />
-          <ProductSection title="Đặt lại" products={PRODUCTS} />
-          <RecommendationSection products={PRODUCTS} />
+          <ProductSection title="Mua Ngay" products={PRODUCTS} onProductPress={handleProductPress} />
+          <ProductSection title="Đặt lại" products={PRODUCTS} onProductPress={handleProductPress} />
+          <RecommendationSection products={PRODUCTS} onProductPress={handleProductPress} />
         </View>
       </ScrollView>
       </SafeAreaView>
