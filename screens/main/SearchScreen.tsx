@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,14 @@ import {
   StyleSheet,
   Modal,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { PRODUCTS, CATEGORIES, Product } from '../../services/mockData';
+import { Product as ApiProduct } from '../../types/api';
+import { ApiService, getProductImage } from '../../services/api';
 import { NavigationProps } from '../../types/navigation';
+import { stripHtmlTags } from '../../utils/textUtils';
 
 interface FilterState {
   categories: string[];
@@ -22,7 +25,7 @@ interface FilterState {
     max: number;
   };
   rating: number;
-  sortBy: 'name' | 'price' | 'rating';
+  sortBy: 'newest' | 'price_asc' | 'price_desc';
   sortOrder: 'asc' | 'desc';
 }
 
@@ -38,12 +41,20 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
   const initialQuery = route?.params?.initialQuery || '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [showFilters, setShowFilters] = useState(false);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    totalItems: 0,
+  });
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     priceRange: { min: 0, max: 1000000 },
     rating: 0,
-    sortBy: 'name',
-    sortOrder: 'asc',
+    sortBy: 'newest',
+    sortOrder: 'desc',
   });
 
   // Set initial query when component mounts
@@ -53,54 +64,78 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
     }
   }, [initialQuery]);
 
-  // Filter and search products
-  const filteredProducts = useMemo(() => {
-    let results = PRODUCTS.filter(product => {
-      // Text search - if no search query, show all products
-      const matchesSearch = !searchQuery || 
-                           product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Category filter
-      const matchesCategory = filters.categories.length === 0 || 
-                             filters.categories.includes(product.categoryId);
-      
-      // Price range filter
-      const matchesPrice = product.price >= filters.priceRange.min && 
-                          product.price <= filters.priceRange.max;
-      
-      // Rating filter
-      const matchesRating = product.rating >= filters.rating;
+  // Load categories on mount
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
-      return matchesSearch && matchesCategory && matchesPrice && matchesRating;
-    });
-
-    // Sort results
-    results.sort((a, b) => {
-      let comparison = 0;
-      switch (filters.sortBy) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case 'price':
-          comparison = a.price - b.price;
-          break;
-        case 'rating':
-          comparison = a.rating - b.rating;
-          break;
-      }
-      return filters.sortOrder === 'asc' ? comparison : -comparison;
-    });
-
-    return results;
+  // Load products when filters change
+  useEffect(() => {
+    loadProducts();
   }, [searchQuery, filters]);
 
-  const toggleCategoryFilter = (categoryId: string) => {
+  const loadCategories = async () => {
+    try {
+      const response = await ApiService.getCategories();
+      
+      if (response.success && response.data) {
+        setCategories(response.data);
+      } else {
+        console.error('❌ Categories failed:', response?.message || 'Unknown error');
+        setCategories([]);
+      }
+    } catch (error: any) {
+      console.error('❌ Categories error:', error?.message || 'Network error');
+      setCategories([]);
+    }
+  };
+
+  const loadProducts = async (page = 1) => {
+    setLoading(true);
+    try {
+      const params = {
+        q: searchQuery || undefined,
+        minPrice: filters.priceRange.min > 0 ? filters.priceRange.min : undefined,
+        maxPrice: filters.priceRange.max < 1000000 ? filters.priceRange.max : undefined,
+        category: filters.categories.length > 0 ? filters.categories[0] : undefined,
+        sort: getSortParam(),
+        page,
+        limit: 20,
+      };
+
+      const response = await ApiService.getProducts(params);
+      
+      if (response.success && response.data) {
+        setProducts(response.data);
+        if (response.pagination) {
+          setPagination({
+            page: response.pagination.page,
+            totalPages: response.pagination.totalPages,
+            totalItems: response.pagination.totalItems,
+          });
+        }
+      } else {
+        console.error('❌ Products failed:', response?.message || 'Unknown error');
+        setProducts([]);
+      }
+    } catch (error: any) {
+      console.error('❌ Products error:', error?.message || 'Network error');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getSortParam = (): 'newest' | 'price_asc' | 'price_desc' => {
+    return filters.sortBy;
+  };
+
+  const toggleCategoryFilter = (categoryName: string) => {
     setFilters(prev => ({
       ...prev,
-      categories: prev.categories.includes(categoryId)
-        ? prev.categories.filter(id => id !== categoryId)
-        : [...prev.categories, categoryId]
+      categories: prev.categories.includes(categoryName)
+        ? prev.categories.filter(name => name !== categoryName)
+        : [categoryName] // Only allow one category for now
     }));
   };
 
@@ -109,8 +144,8 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
       categories: [],
       priceRange: { min: 0, max: 1000000 },
       rating: 0,
-      sortBy: 'name',
-      sortOrder: 'asc',
+      sortBy: 'newest',
+      sortOrder: 'desc',
     });
   };
 
@@ -121,36 +156,43 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
     }).format(price);
   };
 
-  const renderProduct = ({ item }: { item: Product }) => (
-    <TouchableOpacity 
-      style={styles.productCard}
-      onPress={() => navigation.navigate('ProductDetail', { product: item })}
-    >
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
-        <Text style={styles.productDescription} numberOfLines={2}>{item.description}</Text>
-        <View style={styles.productFooter}>
-          <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
-          <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={14} color="#fbbf24" />
-            <Text style={styles.rating}>{item.rating}</Text>
+  const renderProduct = ({ item }: { item: ApiProduct }) => {
+    // Remove HTML tags from description
+    const cleanDescription = stripHtmlTags(item.description);
+    
+    return (
+      <TouchableOpacity 
+        style={styles.productCard}
+        onPress={() => navigation.navigate('ProductDetail', { product: item })}
+      >
+        <Image 
+          source={{ uri: getProductImage(item.imageUrl, item.category, item.name, item.id) }} 
+          style={styles.productImage} 
+        />
+        <View style={styles.productInfo}>
+          <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
+          <Text style={styles.productDescription} numberOfLines={2}>{cleanDescription}</Text>
+          <View style={styles.productFooter}>
+            <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={14} color="#fbbf24" />
+              <Text style={styles.rating}>{item.rating}</Text>
+            </View>
           </View>
+          <TouchableOpacity 
+            style={styles.addToCartButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              // TODO: Add to cart logic
+            }}
+          >
+            <Ionicons name="add" size={16} color="#ffffff" />
+            <Text style={styles.addToCartText}>Thêm</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity 
-          style={styles.addToCartButton}
-          onPress={(e) => {
-            e.stopPropagation();
-            console.log('Added to cart:', item);
-            // TODO: Add to cart logic
-          }}
-        >
-          <Ionicons name="add" size={16} color="#ffffff" />
-          <Text style={styles.addToCartText}>Thêm</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   const FilterModal = () => (
     <Modal
@@ -171,20 +213,20 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
           <View style={styles.filterSection}>
             <Text style={styles.filterTitle}>Danh Mục</Text>
             <View style={styles.categoryGrid}>
-              {CATEGORIES.map(category => (
+              {categories.map(category => (
                 <TouchableOpacity
-                  key={category.id}
+                  key={category}
                   style={[
                     styles.categoryChip,
-                    filters.categories.includes(category.id) && styles.categoryChipActive
+                    filters.categories.includes(category) && styles.categoryChipActive
                   ]}
-                  onPress={() => toggleCategoryFilter(category.id)}
+                  onPress={() => toggleCategoryFilter(category)}
                 >
                   <Text style={[
                     styles.categoryChipText,
-                    filters.categories.includes(category.id) && styles.categoryChipTextActive
+                    filters.categories.includes(category) && styles.categoryChipTextActive
                   ]}>
-                    {category.name}
+                    {category}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -252,9 +294,9 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
             <Text style={styles.filterTitle}>Sắp Xếp</Text>
             <View style={styles.sortContainer}>
               {[
-                { key: 'name', label: 'Tên A-Z' },
-                { key: 'price', label: 'Giá thấp đến cao' },
-                { key: 'rating', label: 'Đánh giá cao nhất' }
+                { key: 'newest', label: 'Mới nhất' },
+                { key: 'price_asc', label: 'Giá thấp đến cao' },
+                { key: 'price_desc', label: 'Giá cao đến thấp' }
               ].map(sort => (
                 <TouchableOpacity
                   key={sort.key}
@@ -265,7 +307,6 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
                   onPress={() => setFilters(prev => ({ 
                     ...prev, 
                     sortBy: sort.key as any,
-                    sortOrder: sort.key === 'price' ? 'asc' : sort.key === 'rating' ? 'desc' : 'asc'
                   }))}
                 >
                   <Text style={[
@@ -288,7 +329,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
             style={styles.applyButton} 
             onPress={() => setShowFilters(false)}
           >
-            <Text style={styles.applyButtonText}>Áp Dụng ({filteredProducts.length})</Text>
+            <Text style={styles.applyButtonText}>Áp Dụng ({pagination.totalItems})</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -328,7 +369,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
       {/* Results Header */}
       <View style={styles.resultsHeader}>
         <Text style={styles.resultsCount}>
-          {filteredProducts.length} sản phẩm
+          {pagination.totalItems} sản phẩm
         </Text>
         {(searchQuery || filters.categories.length > 0 || filters.rating > 0) && (
           <TouchableOpacity onPress={() => {
@@ -341,25 +382,32 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
       </View>
 
       {/* Products List */}
-      <FlatList
-        data={filteredProducts}
-        renderItem={renderProduct}
-        keyExtractor={item => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.productsList}
-        showsVerticalScrollIndicator={false}
-        style={styles.flatList}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="search" size={64} color="#d1d5db" />
-            <Text style={styles.emptyTitle}>Không tìm thấy sản phẩm</Text>
-            <Text style={styles.emptyDescription}>
-              Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc
-            </Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#10b981" />
+          <Text style={styles.loadingText}>Đang tải sản phẩm...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={products}
+          renderItem={renderProduct}
+          keyExtractor={item => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.productsList}
+          showsVerticalScrollIndicator={false}
+          style={styles.flatList}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="search" size={64} color="#d1d5db" />
+              <Text style={styles.emptyTitle}>Không tìm thấy sản phẩm</Text>
+              <Text style={styles.emptyDescription}>
+                Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc
+              </Text>
+            </View>
+          }
+        />
+      )}
 
       <FilterModal />
     </SafeAreaView>
@@ -528,6 +576,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 64,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#6b7280',
+    marginTop: 16,
   },
   // Modal styles
   modalContainer: {

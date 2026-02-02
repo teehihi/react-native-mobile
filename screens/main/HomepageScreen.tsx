@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { ScrollView, RefreshControl, Alert, StatusBar, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, RefreshControl, StatusBar, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
 import { ApiService } from '../../services/api';
 import { NavigationProps } from '../../types/navigation';
-import { PRODUCTS } from '../../services/mockData';
+import { Product } from '../../types/api';
 import { HomepageHeader } from '../../components/HomepageHeader';
 import { ServiceGrid } from '../../components/ServiceGrid';
 import { ProductSection } from '../../components/ProductSection';
@@ -14,12 +14,33 @@ import { RecommendationSection } from '../../components/RecommendationSection';
 interface HomepageScreenProps extends NavigationProps {}
 
 const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      const response = await ApiService.getProducts({ limit: 12 });
+      
+      if (response.success && response.data) {
+        setProducts(response.data || []);
+      } else {
+        console.error('❌ Homepage products failed:', response?.message || 'Unknown error');
+        setProducts([]);
+      }
+    } catch (error: any) {
+      console.error('❌ Homepage error:', error?.message || 'Network error');
+      setProducts([]);
+    }
+  };
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    loadProducts().finally(() => setRefreshing(false));
   }, []);
 
   const handleSearchSubmit = (query: string) => {
@@ -61,9 +82,9 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
         <View className="bg-gray-50 flex-1">
           <ServiceGrid services={services} />
           <PromoBanner />
-          <ProductSection title="Mua Ngay" products={PRODUCTS} onProductPress={handleProductPress} />
-          <ProductSection title="Đặt lại" products={PRODUCTS} onProductPress={handleProductPress} />
-          <RecommendationSection products={PRODUCTS} onProductPress={handleProductPress} />
+          <ProductSection title="Mua Ngay" products={products} onProductPress={handleProductPress} />
+          <ProductSection title="Đặt lại" products={products} onProductPress={handleProductPress} />
+          <RecommendationSection products={products} onProductPress={handleProductPress} />
         </View>
       </ScrollView>
       </SafeAreaView>

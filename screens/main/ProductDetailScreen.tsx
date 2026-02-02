@@ -12,8 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Product } from '../../services/mockData';
-import { NavigationProps } from '../../types/navigation';
+import { Product as ApiProduct } from '../../types/api';
+import { getProductImage } from '../../services/api';
+import { stripHtmlTags } from '../../utils/textUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -21,7 +22,7 @@ interface ProductDetailScreenProps {
   navigation: any;
   route: {
     params: {
-      product: Product;
+      product: ApiProduct;
     };
   };
 }
@@ -34,9 +35,9 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ navigation, r
 
   // Mock additional images (in real app, this would come from API)
   const productImages = [
-    product.image,
-    product.image, // Duplicate for demo
-    product.image,
+    getProductImage(product.imageUrl, product.category, product.name, product.id),
+    getProductImage(product.imageUrl, product.category, product.name, product.id + 1000), // Different seed for variety
+    getProductImage(product.imageUrl, product.category, product.name, product.id + 2000), // Different seed for variety
   ];
 
   const formatPrice = (price: number) => {
@@ -50,21 +51,19 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ navigation, r
     try {
       await Share.share({
         message: `Xem sản phẩm ${product.name} - ${formatPrice(product.price)}`,
-        url: product.image,
+        url: product.imageUrl,
       });
     } catch (error) {
-      console.log('Error sharing:', error);
+      // Handle share error silently
     }
   };
 
   const handleAddToCart = () => {
     // TODO: Add to cart logic
-    console.log('Added to cart:', { product, quantity });
   };
 
   const handleBuyNow = () => {
     // TODO: Buy now logic
-    console.log('Buy now:', { product, quantity });
   };
 
   return (
@@ -155,7 +154,9 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ navigation, r
           {/* Price */}
           <View style={styles.priceSection}>
             <Text style={styles.currentPrice}>{formatPrice(product.price)}</Text>
-            <Text style={styles.originalPrice}>{formatPrice(product.price * 1.2)}</Text>
+            {product.originalPrice && (
+              <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
+            )}
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>-17%</Text>
             </View>
@@ -164,7 +165,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ navigation, r
           {/* Description */}
           <View style={styles.descriptionSection}>
             <Text style={styles.sectionTitle}>Mô tả sản phẩm</Text>
-            <Text style={styles.description}>{product.description}</Text>
+            <Text style={styles.description}>{stripHtmlTags(product.description)}</Text>
             <Text style={styles.description}>
               Sản phẩm được chế biến theo công thức truyền thống, đảm bảo chất lượng và hương vị đặc trưng. 
               Nguyên liệu tươi ngon, được tuyển chọn kỹ lưỡng từ các vùng đặc sản nổi tiếng.

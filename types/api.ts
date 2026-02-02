@@ -124,3 +124,38 @@ export interface UpdatePhoneRequest {
   newPhone: string;
   otpCode?: string;
 }
+
+// Product types
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category: string;
+  imageUrl: string;
+  rating: number;
+  soldCount: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface ProductFilters {
+  q?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  category?: string;
+  sort?: 'price_asc' | 'price_desc' | 'newest';
+  page?: number;
+  limit?: number;
+}
+
+export interface ProductsResponse {
+  data: Product[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}

@@ -2,17 +2,12 @@ import React from 'react';
 import { View, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Product } from '../types/api';
+import { getProductImage } from '../services/api';
+import { stripHtmlTags } from '../utils/textUtils';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
-
-interface Product {
-  id: string;
-  name: string;
-  image: string;
-  price: number;
-  rating: number;
-}
 
 interface ProductSectionProps {
   title: string;
@@ -45,7 +40,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products,
           >
             <View className="relative">
               <Image
-                source={{ uri: product.image }}
+                source={{ uri: getProductImage(product.imageUrl, product.category, product.name, product.id) }}
                 style={{ width: CARD_WIDTH, height: 140 }}
                 resizeMode="cover"
               />
@@ -57,18 +52,21 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products,
               <Text numberOfLines={2} className="font-semibold text-sm mb-1 text-gray-900">
                 {product.name}
               </Text>
-              <Text className="text-xs text-gray-500 mb-2">0.5 km</Text>
+              <Text className="text-xs text-gray-500 mb-2">{product.category}</Text>
+              <Text className="text-xs text-gray-400 mb-2" numberOfLines={1}>
+                {stripHtmlTags(product.description)}
+              </Text>
               <View className="flex-row items-center mb-2">
                 <MaterialCommunityIcons name="tag" size={14} color="#16a34a" />
                 <Text className="text-xs text-green-700 font-semibold ml-1">
-                  Giảm {product.price.toLocaleString('vi-VN')}đ
+                  Giảm {(product.price * 0.2).toLocaleString('vi-VN')}đ
                 </Text>
               </View>
               <TouchableOpacity 
                 className="bg-green-600 rounded-lg py-2 px-3 flex-row items-center justify-center"
                 onPress={(e) => {
                   e.stopPropagation();
-                  console.log('Added to cart:', product);
+                  // TODO: Add to cart logic
                 }}
                 activeOpacity={0.8}
               >

@@ -9,7 +9,7 @@ import {
   API_PORT,
   DEBUG_API,
 } from '@env';
-import { 
+import {
   LoginRequest, 
   RegisterRequest, 
   SendOTPRequest,
@@ -24,6 +24,9 @@ import {
   UserStats,
   SessionStats,
   Session,
+  Product,
+  ProductFilters,
+  ProductsResponse,
 } from '../types/api';
 
 // API Configuration từ environment variables
@@ -39,6 +42,56 @@ const getApiHost = () => {
 const API_HOST = getApiHost();
 const PORT = API_PORT || '3001';
 const API_BASE_URL = `http://${API_HOST}:${PORT}/api`;
+const API_SERVER_URL = `http://${API_HOST}:${PORT}`;
+
+// Helper function to format image URLs
+export const formatImageUrl = (imageUrl: string | null | undefined): string => {
+  if (!imageUrl) return '';
+  
+  // If already a full URL, return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // If relative path, prepend server URL
+  if (imageUrl.startsWith('/')) {
+    return `${API_SERVER_URL}${imageUrl}`;
+  }
+  
+  // If no leading slash, add it
+  return `${API_SERVER_URL}/${imageUrl}`;
+};
+
+// Helper function to get image with fallback to placeholder
+export const getProductImage = (imageUrl: string | null | undefined, category: string, productName?: string, productId?: number): string => {
+  // For development, always use placeholder since images don't exist
+  // In production, you would try the real URL first
+  
+  if (productId) {
+    // Use consistent placeholder based on product ID
+    const seed = productId.toString();
+    return `https://picsum.photos/seed/${seed}/400/300`;
+  }
+  
+  // Fallback to category-based placeholder
+  const categoryImages: { [key: string]: string } = {
+    'Bánh Kẹo': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop',
+    'Đặc Sản Miền Bắc': 'https://images.unsplash.com/photo-1559847844-d721426d6edc?w=400&h=300&fit=crop',
+    'Đặc Sản Miền Trung': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    'Đặc Sản Miền Nam': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop',
+    'Nem Chua': 'https://images.unsplash.com/photo-1559847844-d721426d6edc?w=400&h=300&fit=crop',
+  };
+
+  // Try to find category match
+  for (const [cat, url] of Object.entries(categoryImages)) {
+    if (category.includes(cat)) {
+      return url;
+    }
+  }
+
+  // Default Vietnamese food image
+  return 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop';
+};
 
 // Debug logging
 if (DEBUG_API === 'true') {
@@ -61,7 +114,10 @@ const apiClient = axios.create({
 // Add request interceptor để log requests & Inject Token (Layer 2: Authentication)
 apiClient.interceptors.request.use(
   async (config) => {
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    // Only log in debug mode
+    if (DEBUG_API === 'true') {
+      console.log(`🚀 API: ${config.method?.toUpperCase()} ${config.url}`);
+    }
     
     // Inject Token
     try {
@@ -69,14 +125,14 @@ apiClient.interceptors.request.use(
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-    } catch (error) {
-      console.error('Error getting token', error);
+    } catch (error: any) {
+      console.error('Token error:', error?.message || 'Token access failed');
     }
     
     return config;
   },
-  (error) => {
-    console.error('❌ Request Error:', error);
+  (error: any) => {
+    console.error('❌ Request Error:', error?.message || 'Request failed');
     return Promise.reject(error);
   }
 );
@@ -84,35 +140,33 @@ apiClient.interceptors.request.use(
 // Add response interceptor để log responses & Handle Errors (Layer 4: Rate Limiting, Layer 3: Authz)
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+    // Only log in debug mode
+    if (DEBUG_API === 'true') {
+      console.log(`✅ API: ${response.status} ${response.config.url}`);
+    }
     return response;
   },
   async (error) => {
     const status = error.response?.status;
     const url = error.config?.url;
     
-    console.error(`❌ API Error: ${status || 'Network Error'} ${url}`);
+    console.error(`❌ API Error: ${status || 'Network'} ${url}`);
 
     if (status === 401) {
-      // Layer 2: Authentication Failure - Token Invalid/Expired
-      console.log('🔒 401 Unauthorized - Logout user or Refresh token');
-      // Logic to logout or refresh token could go here
-      // For now, we might rely on the sensitive UI to redirect to login
+      console.log('🔒 Unauthorized - Token expired');
     }
 
     if (status === 403) {
-      // Layer 3: Authorization Failure - Forbidden
-      console.log('🚫 403 Forbidden - User does not have permission');
+      console.log('🚫 Forbidden - No permission');
     }
 
     if (status === 429) {
-      // Layer 4: Rate Limiting
-      console.warn('⏳ 429 Too Many Requests - Please look at Rate Limit headers');
-      // Ideally, show a toast or alert to the user
+      console.warn('⏳ Too Many Requests');
     }
 
-    if (error.response?.data) {
-      console.error('❌ Error Response Data:', JSON.stringify(error.response.data, null, 2));
+    // Only log detailed error in debug mode
+    if (DEBUG_API === 'true' && error.response?.data) {
+      console.error('Error details:', error.response.data);
     }
 
     return Promise.reject(error);
@@ -699,6 +753,56 @@ export class ApiService {
         await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(response.data.data.user));
       }
 
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // --- Product APIs ---
+
+  // Get products with filters and pagination
+  static async getProducts(params?: ProductFilters): Promise<ApiResponse<Product[]> & { pagination?: any }> {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]> & { pagination?: any }>('/products', { params });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get product by ID
+  static async getProductById(id: string | number): Promise<ApiResponse<Product>> {
+    try {
+      const response = await apiClient.get<ApiResponse<Product>>(`/products/${id}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get product categories
+  static async getCategories(): Promise<ApiResponse<string[]>> {
+    try {
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/categories');
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {
