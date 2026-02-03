@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Category } from '../types/api';
@@ -64,6 +64,8 @@ export const CategorySlider: React.FC<CategorySliderProps> = ({
   onCategoryPress, 
   onViewAllPress 
 }) => {
+  const [currentPage, setCurrentPage] = useState(0);
+  
   // Add "Xem Tất Cả" as the last item
   const allItems = [...categories, { name: 'Xem Tất Cả', isViewAll: true }];
   
@@ -77,6 +79,12 @@ export const CategorySlider: React.FC<CategorySliderProps> = ({
   
   const containerWidth = width - 32; // Account for mx-4 margin
   const pageWidth = containerWidth - 32; // Account for container padding
+
+  const handleScroll = (event: any) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const page = Math.round(scrollPosition / pageWidth);
+    setCurrentPage(page);
+  };
 
   const renderCategoryItem = (item: any, index: number) => {
     const isViewAll = item.isViewAll;
@@ -121,6 +129,8 @@ export const CategorySlider: React.FC<CategorySliderProps> = ({
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ alignItems: 'flex-start' }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {pages.map((pageItems, pageIndex) => (
           <View 
@@ -157,7 +167,7 @@ export const CategorySlider: React.FC<CategorySliderProps> = ({
             <View
               key={index}
               className="w-2 h-2 rounded-full mx-1"
-              style={{ backgroundColor: index === 0 ? '#16a34a' : '#d1d5db' }}
+              style={{ backgroundColor: index === currentPage ? '#16a34a' : '#d1d5db' }}
             />
           ))}
         </View>
