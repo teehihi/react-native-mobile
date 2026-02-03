@@ -33,12 +33,14 @@ interface SearchScreenProps extends NavigationProps {
   route?: {
     params?: {
       initialQuery?: string;
+      category?: string;
     };
   };
 }
 
 const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
   const initialQuery = route?.params?.initialQuery || '';
+  const initialCategory = route?.params?.category || '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [showFilters, setShowFilters] = useState(false);
   const [products, setProducts] = useState<ApiProduct[]>([]);
@@ -50,7 +52,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
     totalItems: 0,
   });
   const [filters, setFilters] = useState<FilterState>({
-    categories: [],
+    categories: initialCategory ? [initialCategory] : [],
     priceRange: { min: 0, max: 1000000 },
     rating: 0,
     sortBy: 'newest',

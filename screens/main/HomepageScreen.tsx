@@ -4,12 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
 import { ApiService } from '../../services/api';
 import { NavigationProps } from '../../types/navigation';
-import { Product } from '../../types/api';
+import { Product, Category } from '../../types/api';
 import { HomepageHeader } from '../../components/HomepageHeader';
-import { ServiceGrid } from '../../components/ServiceGrid';
+import { CategorySlider } from '../../components/CategorySlider';
+import { BestSellersSection } from '../../components/BestSellersSection';
 import { ProductSection } from '../../components/ProductSection';
 import { PromoBanner } from '../../components/PromoBanner';
-import { RecommendationSection } from '../../components/RecommendationSection';
+import { DiscountedProductsSection } from '../../components/DiscountedProductsSection';
+import { CategoryModal } from '../../components/CategoryModal';
 
 interface HomepageScreenProps extends NavigationProps {}
 
@@ -17,10 +19,23 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
   const { user } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [bestSellers, setBestSellers] = useState<Product[]>([]);
+  const [discountedProducts, setDiscountedProducts] = useState<Product[]>([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   useEffect(() => {
-    loadProducts();
+    loadAllData();
   }, []);
+
+  const loadAllData = async () => {
+    await Promise.all([
+      loadProducts(),
+      loadCategories(),
+      loadBestSellers(),
+      loadDiscountedProducts()
+    ]);
+  };
 
   const loadProducts = async () => {
     try {
@@ -38,55 +53,120 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
     }
   };
 
+  const loadCategories = async () => {
+    try {
+      const response = await ApiService.getCategoriesWithProducts();
+      
+      if (response.success && response.data) {
+        setCategories(response.data || []);
+      } else {
+        console.error('❌ Categories failed:', response?.message || 'Unknown error');
+        setCategories([]);
+      }
+    } catch (error: any) {
+      console.error('❌ Categories error:', error?.message || 'Network error');
+      setCategories([]);
+    }
+  };
+
+  const loadBestSellers = async () => {
+    try {
+      const response = await ApiService.getBestSellers(10);
+      
+      if (response.success && response.data) {
+        setBestSellers(response.data || []);
+      } else {
+        console.error('❌ Best sellers failed:', response?.message || 'Unknown error');
+        setBestSellers([]);
+      }
+    } catch (error: any) {
+      console.error('❌ Best sellers error:', error?.message || 'Network error');
+      setBestSellers([]);
+    }
+  };
+
+  const loadDiscountedProducts = async () => {
+    try {
+      const response = await ApiService.getDiscountedProducts(20);
+      
+      if (response.success && response.data) {
+        setDiscountedProducts(response.data || []);
+      } else {
+        console.error('❌ Discounted products failed:', response?.message || 'Unknown error');
+        setDiscountedProducts([]);
+      }
+    } catch (error: any) {
+      console.error('❌ Discounted products error:', error?.message || 'Network error');
+      setDiscountedProducts([]);
+    }
+  };
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    loadProducts().finally(() => setRefreshing(false));
+    loadAllData().finally(() => setRefreshing(false));
   }, []);
 
   const handleSearchSubmit = (query: string) => {
-    // Navigate to Search screen with the query
     navigation.navigate('Search', { initialQuery: query });
   };
 
-  const handleProductPress = (product: any) => {
+  const handleProductPress = (product: Product) => {
     navigation.navigate('ProductDetail', { product });
   };
 
-  // Service grid items
-  const services = [
-    { id: 1, name: 'Bánh Kẹo', icon: 'candy', color: '#fbbf24' },
-    { id: 2, name: 'Trà & Café', icon: 'coffee', color: '#8b5cf6' },
-    { id: 3, name: 'Đồ Khô', icon: 'fish', color: '#06b6d4' },
-    { id: 4, name: 'Gia Vị', icon: 'shaker', color: '#f97316' },
-    { id: 5, name: 'Quà Tặng', icon: 'gift', color: '#ec4899' },
-    { id: 6, name: 'Đặc Sản', icon: 'food-variant', color: '#10b981' },
-    { id: 7, name: 'Trái Cây', icon: 'fruit-cherries', color: '#ef4444' },
-    { id: 8, name: 'Xem Tất Cả', icon: 'apps', color: '#6b7280' },
-  ];
+  const handleCategoryPress = (categoryName: string) => {
+    // Navigate to search screen with category filter
+    (navigation as any).navigate('Search', { initialQuery: '', category: categoryName });
+  };
+
+  const handleViewAllCategories = () => {
+    setShowCategoryModal(true);
+  };
 
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView className="flex-1 bg-green-600" edges={[]}>
         <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#16a34a" />
-        }
-      >
-        <HomepageHeader 
-          user={user} 
-          onAvatarPress={() => (navigation as any).navigate('Profile')}
-          onSearchSubmit={handleSearchSubmit}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#16a34a" />
+          }
+        >
+          <HomepageHeader 
+            user={user} 
+            onAvatarPress={() => (navigation as any).navigate('Profile')}
+            onSearchSubmit={handleSearchSubmit}
+          />
+          <View className="bg-gray-50 flex-1">
+            <CategorySlider 
+              categories={categories}
+              onCategoryPress={handleCategoryPress}
+              onViewAllPress={handleViewAllCategories}
+            />
+            <PromoBanner />
+            <BestSellersSection 
+              products={bestSellers}
+              onProductPress={handleProductPress}
+            />
+            <ProductSection 
+              title="Mua Ngay" 
+              products={products} 
+              onProductPress={handleProductPress} 
+            />
+            <DiscountedProductsSection 
+              products={discountedProducts}
+              onProductPress={handleProductPress}
+            />
+          </View>
+        </ScrollView>
+
+        <CategoryModal
+          visible={showCategoryModal}
+          categories={categories}
+          onClose={() => setShowCategoryModal(false)}
+          onCategoryPress={handleCategoryPress}
         />
-        <View className="bg-gray-50 flex-1">
-          <ServiceGrid services={services} />
-          <PromoBanner />
-          <ProductSection title="Mua Ngay" products={products} onProductPress={handleProductPress} />
-          <ProductSection title="Đặt lại" products={products} onProductPress={handleProductPress} />
-          <RecommendationSection products={products} onProductPress={handleProductPress} />
-        </View>
-      </ScrollView>
       </SafeAreaView>
     </>
   );

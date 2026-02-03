@@ -138,6 +138,12 @@ export interface Product {
   soldCount: number;
   isActive: boolean;
   createdAt: string;
+  discountPercentage?: number;
+}
+
+export interface Category {
+  name: string;
+  productCount: number;
 }
 
 export interface ProductFilters {

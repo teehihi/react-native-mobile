@@ -29,7 +29,7 @@ export type RootStackParamList = {
     otpCode: string;
   };
   Homepage: undefined;
-  Search: { initialQuery?: string };
+  Search: { initialQuery?: string; category?: string };
   ProductDetail: { product: any };
   ProfileEdit: undefined;
   ChangePassword: undefined;

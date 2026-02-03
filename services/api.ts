@@ -814,4 +814,56 @@ export class ApiService {
       };
     }
   }
+
+  // Get categories with products
+  static async getCategoriesWithProducts(): Promise<ApiResponse<Array<{name: string, productCount: number}>>> {
+    try {
+      const response = await apiClient.get<ApiResponse<Array<{name: string, productCount: number}>>>('/products/categories-with-products');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get best selling products
+  static async getBestSellers(limit: number = 10): Promise<ApiResponse<Product[]>> {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>('/products/bestsellers', { 
+        params: { limit } 
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
+
+  // Get discounted products
+  static async getDiscountedProducts(limit: number = 20): Promise<ApiResponse<Product[]>> {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>('/products/discounted', { 
+        params: { limit } 
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Lỗi kết nối mạng. Vui lòng thử lại.',
+      };
+    }
+  }
 }
