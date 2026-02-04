@@ -39,7 +39,9 @@ export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps>
         />
         {/* Discount Badge */}
         <View className="absolute top-2 left-2 bg-red-500 rounded-full px-2 py-1">
-          <Text className="text-white text-xs font-bold">-{item.discountPercentage || 20}%</Text>
+          <Text className="text-white text-xs font-bold">
+            -{item.discountPercentage || 0}%
+          </Text>
         </View>
         {/* Sale Badge */}
         <View className="absolute top-2 right-2 bg-red-500 rounded-full px-2 py-1">

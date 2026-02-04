@@ -45,7 +45,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products,
                 resizeMode="cover"
               />
               <View className="absolute top-2 left-2 bg-red-500 rounded-full px-2 py-1">
-                <Text className="text-white text-xs font-bold">-20%</Text>
+                <Text className="text-white text-xs font-bold">
+                  -{product.discountPercentage || 20}%
+                </Text>
               </View>
             </View>
             <View className="p-3 flex-1 justify-between">
@@ -60,7 +62,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products,
                 <View className="flex-row items-center mb-2">
                   <MaterialCommunityIcons name="tag" size={14} color="#16a34a" />
                   <Text className="text-xs text-green-700 font-semibold ml-1">
-                    Giảm {(product.price * 0.2).toLocaleString('vi-VN')}đ
+                    {product.originalPrice && product.discountPercentage ? 
+                      `Giảm ${(product.originalPrice - product.price).toLocaleString('vi-VN')}đ` :
+                      `Giá tốt ${product.price.toLocaleString('vi-VN')}đ`
+                    }
                   </Text>
                 </View>
               </View>
