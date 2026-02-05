@@ -33,8 +33,22 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products,
         {products.slice(0, 5).map((product) => (
           <TouchableOpacity
             key={product.id}
-            className="mr-3 bg-white rounded-2xl overflow-hidden shadow-sm flex"
-            style={{ width: CARD_WIDTH, height: 300 }} // Standardized height
+            className="mr-3 bg-white rounded-2xl overflow-hidden shadow-lg"
+            style={[
+              { 
+                width: CARD_WIDTH, 
+                height: 300,
+                shadowColor: '#000',
+                shadowOffset: {
+                  width: 0,
+                  height: 4,
+                },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                borderRadius: 16, // Match rounded-2xl (16px)
+                elevation: 8, // For Android
+              }
+            ]}
             activeOpacity={0.9}
             onPress={() => onProductPress?.(product)}
           >
@@ -44,11 +58,13 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products,
                 style={{ width: CARD_WIDTH, height: 140 }}
                 resizeMode="cover"
               />
-              <View className="absolute top-2 left-2 bg-red-500 rounded-full px-2 py-1">
-                <Text className="text-white text-xs font-bold">
-                  -{product.discountPercentage || 20}%
-                </Text>
-              </View>
+              {product.discountPercentage && product.discountPercentage > 0 ? (
+                <View className="absolute top-2 left-2 bg-red-500 rounded-full px-2 py-1">
+                  <Text className="text-white text-xs font-bold">
+                    -{product.discountPercentage}%
+                  </Text>
+                </View>
+              ) : null}
             </View>
             <View className="p-3 flex-1 justify-between">
               <View className="flex-1">

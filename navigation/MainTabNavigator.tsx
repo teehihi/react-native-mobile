@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { 
   HomepageScreen, 
   SearchScreen, 
+  CategoryScreen,
   CartScreen,
   ProductDetailScreen,
   AccountScreen,
@@ -18,21 +19,23 @@ const Tab = createBottomTabNavigator();
 const ProfileStack = createStackNavigator();
 const MainStack = createStackNavigator();
 
-// Main Stack Navigator (Homepage -> ProductDetail)
+// Main Stack Navigator (Homepage -> Category -> ProductDetail)
 const MainStackNavigator = () => {
   return (
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
       <MainStack.Screen name="HomepageMain" component={HomepageScreen} />
+      <MainStack.Screen name="Category" component={CategoryScreen} />
       <MainStack.Screen name="ProductDetail" component={ProductDetailScreen} />
     </MainStack.Navigator>
   );
 };
 
-// Search Stack Navigator (Search -> ProductDetail)
+// Search Stack Navigator (Search -> Category -> ProductDetail)
 const SearchStackNavigator = () => {
   return (
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
       <MainStack.Screen name="SearchMain" component={SearchScreen} />
+      <MainStack.Screen name="Category" component={CategoryScreen} />
       <MainStack.Screen name="ProductDetail" component={ProductDetailScreen} />
     </MainStack.Navigator>
   );

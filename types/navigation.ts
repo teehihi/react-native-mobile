@@ -30,6 +30,7 @@ export type RootStackParamList = {
   };
   Homepage: undefined;
   Search: { initialQuery?: string; category?: string };
+  Category: { categoryName: string };
   ProductDetail: { product: any };
   ProfileEdit: undefined;
   ChangePassword: undefined;

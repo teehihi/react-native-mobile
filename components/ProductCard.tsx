@@ -1,22 +1,17 @@
 import React from 'react';
-import { View, TouchableOpacity, Dimensions, Image, Text, FlatList } from 'react-native';
+import { View, TouchableOpacity, Image, Text, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Product } from '../types/api';
 import { getProductImage } from '../services/api';
 import { stripHtmlTags } from '../utils/textUtils';
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 48) / 2; // 2 columns
-
-interface DiscountedProductsSectionProps {
-  products: Product[];
-  onProductPress?: (product: Product) => void;
+interface ProductCardProps {
+  product: Product;
+  onPress: () => void;
+  style?: ViewStyle;
 }
 
-export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps> = ({ 
-  products, 
-  onProductPress 
-}) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, style }) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -24,12 +19,11 @@ export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps>
     }).format(price);
   };
 
-  const renderProduct = ({ item }: { item: Product }) => (
+  return (
     <TouchableOpacity
-      className="mb-4 bg-white rounded-2xl overflow-hidden shadow-lg"
+      className="bg-white rounded-2xl overflow-hidden shadow-lg"
       style={[
         { 
-          width: CARD_WIDTH, 
           height: 320,
           shadowColor: '#000',
           shadowOffset: {
@@ -40,27 +34,30 @@ export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps>
           shadowRadius: 8,
           borderRadius: 16, // Match rounded-2xl (16px)
           elevation: 8, // For Android
-        }
+        }, 
+        style
       ]}
       activeOpacity={0.9}
-      onPress={() => onProductPress?.(item)}
+      onPress={onPress}
     >
       <View className="relative">
         <Image
-          source={{ uri: getProductImage(item.imageUrl, item.category, item.name, item.id) }}
-          style={{ width: CARD_WIDTH, height: 160 }} // Larger image
+          source={{ uri: getProductImage(product.imageUrl, product.category, product.name, product.id) }}
+          style={{ width: '100%', height: 160 }} // Same height as DiscountedProductsSection
           resizeMode="cover"
         />
+        
         {/* Discount Badge */}
-        {item.discountPercentage && item.discountPercentage > 0 ? (
+        {product.discountPercentage && product.discountPercentage > 0 ? (
           <View className="absolute top-2 left-2 bg-red-500 rounded-full px-2 py-1">
             <Text className="text-white text-xs font-bold">
-              -{item.discountPercentage}%
+              -{product.discountPercentage}%
             </Text>
           </View>
         ) : null}
+        
         {/* Sale Badge */}
-        {item.discountPercentage && item.discountPercentage > 0 ? (
+        {product.discountPercentage && product.discountPercentage > 0 ? (
           <View className="absolute top-2 right-2 bg-red-500 rounded-full px-2 py-1">
             <Text className="text-white text-xs font-bold">SALE</Text>
           </View>
@@ -70,7 +67,7 @@ export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps>
       <View className="p-3 flex-1">
         {/* Product Name */}
         <Text numberOfLines={1} className="font-bold text-base mb-2 text-gray-900">
-          {item.name}
+          {product.name}
         </Text>
         
         {/* Rating Section */}
@@ -88,27 +85,27 @@ export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps>
           {/* Review Count */}
           <View className="flex-row items-center ml-2">
             <MaterialCommunityIcons name="message-text" size={14} color="#6b7280" />
-            <Text className="text-xs text-gray-500 ml-1">{item.soldCount || 97}</Text>
+            <Text className="text-xs text-gray-500 ml-1">{product.soldCount || 97}</Text>
           </View>
         </View>
         
         {/* Description */}
         <Text className="text-xs text-gray-600 mb-3" numberOfLines={2} style={{ lineHeight: 16 }}>
-          {stripHtmlTags(item.description) || "Dưới đây là mô tả của sản phẩm này..... Bao gồm thông tin mô tả có ... nếu dài"}
+          {stripHtmlTags(product.description) || "Dưới đây là mô tả của sản phẩm này..... Bao gồm thông tin mô tả có ... nếu dài"}
         </Text>
         
         {/* Price and Cart Section */}
         <View className="flex-row items-end justify-between">
           <View className="flex-1">
             {/* Original Price */}
-            {item.originalPrice && (
+            {product.originalPrice && (
               <Text className="text-xs text-gray-400 line-through mb-1">
-                {formatPrice(item.originalPrice)}
+                {formatPrice(product.originalPrice)}
               </Text>
             )}
             {/* Current Price */}
             <Text className="text-lg font-bold text-red-600">
-              {formatPrice(item.price)}
+              {formatPrice(product.price)}
             </Text>
           </View>
           
@@ -117,7 +114,7 @@ export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps>
             className="bg-green-500 rounded-xl p-3"
             onPress={(e) => {
               e.stopPropagation();
-              onProductPress?.(item);
+              // TODO: Add to cart logic
             }}
             activeOpacity={0.8}
           >
@@ -127,26 +124,6 @@ export const DiscountedProductsSection: React.FC<DiscountedProductsSectionProps>
       </View>
     </TouchableOpacity>
   );
-
-  return (
-    <View className="px-4 mt-6" style={{ paddingBottom: 120 }}> {/* Increased padding for shadow */}
-      <View className="mb-3 flex-row justify-between items-center">
-        <Text className="text-lg font-bold text-gray-900">⚡ Giảm Giá Sốc</Text>
-        <TouchableOpacity className="flex-row items-center">
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#16a34a" />
-        </TouchableOpacity>
-      </View>
-      
-      <FlatList
-        data={products}
-        renderItem={renderProduct}
-        keyExtractor={item => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between' }}
-        scrollEnabled={false} // Disable scroll since it's inside ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }} // Extra space for shadow
-      />
-    </View>
-  );
 };
+
+export default ProductCard;

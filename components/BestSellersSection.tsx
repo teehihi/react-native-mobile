@@ -41,8 +41,22 @@ export const BestSellersSection: React.FC<BestSellersSectionProps> = ({
         {products.map((product, index) => (
           <TouchableOpacity
             key={product.id}
-            className="mr-3 bg-white rounded-2xl overflow-hidden shadow-sm"
-            style={{ width: CARD_WIDTH, height: 300 }} // Standardized height
+            className="mr-3 bg-white rounded-2xl overflow-hidden shadow-lg"
+            style={[
+              { 
+                width: CARD_WIDTH, 
+                height: 300,
+                shadowColor: '#000',
+                shadowOffset: {
+                  width: 0,
+                  height: 4,
+                },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                borderRadius: 16, // Match rounded-2xl (16px)
+                elevation: 8, // For Android
+              }
+            ]}
             activeOpacity={0.9}
             onPress={() => onProductPress?.(product)}
           >

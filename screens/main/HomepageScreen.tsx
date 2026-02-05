@@ -115,8 +115,8 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
   };
 
   const handleCategoryPress = (categoryName: string) => {
-    // Navigate to search screen with category filter
-    (navigation as any).navigate('Search', { initialQuery: '', category: categoryName });
+    // Navigate to Category screen
+    (navigation as any).navigate('Category', { categoryName });
   };
 
   const handleViewAllCategories = () => {
