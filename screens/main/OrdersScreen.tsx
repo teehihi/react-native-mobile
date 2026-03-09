@@ -52,15 +52,14 @@ const OrdersScreen = () => {
 
   const getStatusInfo = (status: OrderStatus) => {
     const statusMap = {
-      NEW: { label: 'Đơn hàng mới', color: 'bg-blue-100 text-blue-700', icon: 'receipt-outline' },
-      CONFIRMED: { label: 'Đã xác nhận', color: 'bg-green-100 text-green-700', icon: 'checkmark-circle-outline' },
-      PREPARING: { label: 'Đang chuẩn bị', color: 'bg-yellow-100 text-yellow-700', icon: 'time-outline' },
-      SHIPPING: { label: 'Đang giao hàng', color: 'bg-purple-100 text-purple-700', icon: 'car-outline' },
+      PENDING: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-700', icon: 'time-outline' },
+      CONFIRMED: { label: 'Đã xác nhận', color: 'bg-blue-100 text-blue-700', icon: 'checkmark-circle-outline' },
+      PROCESSING: { label: 'Đang xử lý', color: 'bg-purple-100 text-purple-700', icon: 'sync-outline' },
+      SHIPPING: { label: 'Đang giao hàng', color: 'bg-indigo-100 text-indigo-700', icon: 'car-outline' },
       DELIVERED: { label: 'Đã giao', color: 'bg-green-100 text-green-700', icon: 'checkmark-done-outline' },
       CANCELLED: { label: 'Đã hủy', color: 'bg-red-100 text-red-700', icon: 'close-circle-outline' },
-      CANCEL_REQUESTED: { label: 'Yêu cầu hủy', color: 'bg-orange-100 text-orange-700', icon: 'alert-circle-outline' },
     };
-    return statusMap[status] || statusMap.NEW;
+    return statusMap[status] || statusMap.PENDING;
   };
 
   const canCancelOrder = (order: Order): boolean => {
@@ -77,48 +76,26 @@ const OrdersScreen = () => {
   };
 
   const handleCancelOrder = async (order: Order) => {
-    if (order.status === 'PREPARING') {
-      Alert.alert(
-        'Yêu cầu hủy đơn',
-        'Đơn hàng đang được chuẩn bị. Bạn có muốn gửi yêu cầu hủy đơn đến shop?',
-        [
-          { text: 'Không', style: 'cancel' },
-          {
-            text: 'Gửi yêu cầu',
-            onPress: async () => {
-              const response = await ApiService.cancelOrder(order.id);
-              if (response.success) {
-                loadOrders();
-                Alert.alert('Thành công', 'Đã gửi yêu cầu hủy đơn đến shop');
-              } else {
-                Alert.alert('Lỗi', response.message || 'Không thể gửi yêu cầu hủy');
-              }
-            },
+    Alert.alert(
+      'Hủy đơn hàng',
+      `Bạn có chắc muốn hủy đơn hàng ${order.id}?`,
+      [
+        { text: 'Không', style: 'cancel' },
+        {
+          text: 'Hủy đơn',
+          style: 'destructive',
+          onPress: async () => {
+            const response = await ApiService.cancelOrder(order.id);
+            if (response.success) {
+              loadOrders();
+              Alert.alert('Thành công', 'Đã hủy đơn hàng');
+            } else {
+              Alert.alert('Lỗi', response.message || 'Không thể hủy đơn hàng');
+            }
           },
-        ]
-      );
-    } else {
-      Alert.alert(
-        'Hủy đơn hàng',
-        `Bạn có chắc muốn hủy đơn hàng ${order.id}?`,
-        [
-          { text: 'Không', style: 'cancel' },
-          {
-            text: 'Hủy đơn',
-            style: 'destructive',
-            onPress: async () => {
-              const response = await ApiService.cancelOrder(order.id);
-              if (response.success) {
-                loadOrders();
-                Alert.alert('Thành công', 'Đã hủy đơn hàng');
-              } else {
-                Alert.alert('Lỗi', response.message || 'Không thể hủy đơn hàng');
-              }
-            },
-          },
-        ]
-      );
-    }
+        },
+      ]
+    );
   };
 
   const formatPrice = (price: number) => {
