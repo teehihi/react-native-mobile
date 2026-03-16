@@ -138,6 +138,7 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
             onAvatarPress={() => (navigation as any).navigate('Profile')}
             onSearchSubmit={handleSearchSubmit}
             onCartPress={() => navigation.navigate('Cart' as never)}
+            onNotificationPress={() => navigation.navigate('Notifications' as never)}
           />
           <View className="bg-gray-50 flex-1">
             <CategorySlider 

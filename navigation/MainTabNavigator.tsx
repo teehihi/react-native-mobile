@@ -22,6 +22,8 @@ import {
 import FavoritesScreen from '../screens/main/FavoritesScreen';
 import WriteReviewScreen from '../screens/main/WriteReviewScreen';
 import CouponsScreen from '../screens/main/CouponsScreen';
+import NotificationScreen from '../screens/main/NotificationScreen';
+import SpendingStatsScreen from '../screens/main/SpendingStatsScreen';
 import { CustomTabBar } from '../components/CustomTabBar';
 
 const Tab = createBottomTabNavigator();
@@ -39,6 +41,8 @@ const MainStackNavigator = () => {
       <MainStack.Screen name="Checkout" component={CheckoutScreen} />
       <MainStack.Screen name="AddressList" component={AddressListScreen} />
       <MainStack.Screen name="AddAddress" component={AddAddressScreen} />
+      <MainStack.Screen name="Notifications" component={NotificationScreen} />
+      <MainStack.Screen name="SpendingStats" component={SpendingStatsScreen} />
     </MainStack.Navigator>
   );
 };
@@ -92,6 +96,8 @@ const ProfileStackNavigator = () => {
       <ProfileStack.Screen name="ChangePhone" component={ChangePhoneScreen} />
       <ProfileStack.Screen name="Favorites" component={FavoritesScreen} />
       <ProfileStack.Screen name="Coupons" component={CouponsScreen} />
+      <ProfileStack.Screen name="Notifications" component={NotificationScreen} />
+      <ProfileStack.Screen name="SpendingStats" component={SpendingStatsScreen} />
     </ProfileStack.Navigator>
   );
 };

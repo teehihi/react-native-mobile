@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Image, TextInput } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { User } from '../types/api';
-import { formatImageUrl } from '../services/api';
+import { formatImageUrl, ApiService } from '../services/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCartStore } from '../store/cartStore';
+import { useNotificationStore } from '../store/notificationStore';
 
 
 interface HomepageHeaderProps {
@@ -13,13 +14,21 @@ interface HomepageHeaderProps {
   onAvatarPress: () => void;
   onSearchSubmit: (query: string) => void;
   onCartPress: () => void;
+  onNotificationPress: () => void;
 }
 
-export const HomepageHeader: React.FC<HomepageHeaderProps> = ({ user, onAvatarPress, onSearchSubmit, onCartPress }) => {
+export const HomepageHeader: React.FC<HomepageHeaderProps> = ({ user, onAvatarPress, onSearchSubmit, onCartPress, onNotificationPress }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { getTotalItems } = useCartStore();
   const cartCount = getTotalItems();
+  const { unreadCount, setUnreadCount } = useNotificationStore();
+
+  useEffect(() => {
+    ApiService.getUnreadCount().then(res => {
+      if (res.success && res.data) setUnreadCount(res.data.count || 0);
+    }).catch(() => {});
+  }, []);
 
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
@@ -117,8 +126,29 @@ export const HomepageHeader: React.FC<HomepageHeaderProps> = ({ user, onAvatarPr
             )}
           </TouchableOpacity>
 
-          {/* User Avatar */}
-          <TouchableOpacity 
+          {/* Bell Icon */}
+          <TouchableOpacity
+            className="items-center justify-center ml-3"
+            onPress={onNotificationPress}
+            activeOpacity={0.7}
+            style={{ width: 44, height: 44 }}
+          >
+            <MaterialCommunityIcons name="bell-outline" size={26} color="white" />
+            {unreadCount > 0 && (
+              <View style={{
+                position: 'absolute', top: 2, right: 2,
+                backgroundColor: '#ef4444', borderRadius: 10,
+                minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center',
+                paddingHorizontal: 3, borderWidth: 1.5, borderColor: 'white',
+              }}>
+                <Text style={{ color: 'white', fontSize: 9, fontWeight: '700' }}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {/* User Avatar */}          <TouchableOpacity 
             className="w-11 h-11 rounded-full overflow-hidden border-2 border-white ml-2"
             onPress={onAvatarPress}
             activeOpacity={0.7}

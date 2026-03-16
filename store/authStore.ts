@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../services/api';
 import { User } from '../types/api';
 import { RealmService } from '../services/realm';
+import { connectSocket, disconnectSocket } from '../services/socket';
 
 interface AuthState {
   user: User | null;
@@ -24,6 +25,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
       await RealmService.saveUser(user);
+      connectSocket(token);
       set({ 
         token, 
         user, 
@@ -32,7 +34,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (error) {
       console.error('Login error', error);
-      // Even if storage fails, we might want to update state or handle error
     }
   },
 
@@ -40,6 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
       await RealmService.clearUserData();
+      disconnectSocket();
       set({ 
         token: null, 
         user: null, 
@@ -58,6 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const user = await RealmService.getUser();
       
       if (token && user) {
+        connectSocket(token);
         set({ 
           token, 
           user, 

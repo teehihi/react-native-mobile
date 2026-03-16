@@ -4,6 +4,7 @@ import './global.css';
 import './services/nativewindInterop';
 import { useAuthStore } from './store/authStore';
 import { useCartStore } from './store/cartStore';
+import { requestNotificationPermission, setupSocketNotificationListener } from './services/notificationService';
 
 // Component to initialize auth state and cart
 const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -11,8 +12,12 @@ const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const loadCart = useCartStore(state => state.loadCart);
 
   useEffect(() => {
+    // Setup listener TRƯỚC khi checkAuth (checkAuth sẽ connectSocket)
+    const unsub = setupSocketNotificationListener();
+    requestNotificationPermission();
     checkAuth();
     loadCart();
+    return unsub;
   }, [checkAuth, loadCart]);
 
   return <>{children}</>;

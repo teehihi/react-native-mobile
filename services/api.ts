@@ -1100,4 +1100,56 @@ export class ApiService {
       return { success: false, message: 'Lỗi kết nối mạng.' };
     }
   }
+
+  // Notifications
+  static async getNotifications(): Promise<ApiResponse<{ notifications: any[]; unreadCount: number }>> {
+    try {
+      const response = await apiClient.get('/notifications');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) return error.response.data;
+      return { success: false, message: 'Lỗi kết nối mạng.' };
+    }
+  }
+
+  static async getUnreadCount(): Promise<ApiResponse<{ count: number }>> {
+    try {
+      const response = await apiClient.get('/notifications/unread-count');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) return error.response.data;
+      return { success: false, message: 'Lỗi kết nối mạng.' };
+    }
+  }
+
+  static async markNotificationRead(id: number): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.put(`/notifications/${id}/read`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) return error.response.data;
+      return { success: false, message: 'Lỗi kết nối mạng.' };
+    }
+  }
+
+  static async markAllNotificationsRead(): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.put('/notifications/read-all');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) return error.response.data;
+      return { success: false, message: 'Lỗi kết nối mạng.' };
+    }
+  }
+
+  // Spending statistics
+  static async getSpendingStats(): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.get('/orders/spending-stats');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) return error.response.data;
+      return { success: false, message: 'Lỗi kết nối mạng.' };
+    }
+  }
 }

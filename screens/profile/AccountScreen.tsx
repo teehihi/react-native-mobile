@@ -247,6 +247,16 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
               onPress={() => navigation.navigate('Coupons')}
             />
             <MenuItem
+              icon="chart-line"
+              title="Thống kê dòng tiền"
+              onPress={() => navigation.navigate('SpendingStats' as never)}
+            />
+            <MenuItem
+              icon="bell-outline"
+              title="Thông báo"
+              onPress={() => navigation.navigate('Notifications' as never)}
+            />
+            <MenuItem
               icon="silverware-fork-knife"
               title="Chế độ ăn uống"
               onPress={() => {}}

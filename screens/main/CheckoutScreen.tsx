@@ -118,10 +118,19 @@ const CheckoutScreen = () => {
       const response = await ApiService.createOrder(orderData);
       if (response.success && response.data) {
         await clearCart();
+        const orderId = response.data.order.id;
         Alert.alert(
           'Đặt hàng thành công!',
-          `Mã đơn hàng: ${response.data.order.id}\nChúng tôi sẽ xác nhận trong vòng 30 phút.`,
-          [{ text: 'Xem đơn hàng', onPress: () => navigation.navigate('Orders' as never) }]
+          `Mã đơn hàng: ${orderId}\nChúng tôi sẽ xác nhận trong vòng 30 phút.`,
+          [{
+            text: 'Xem đơn hàng',
+            onPress: () => {
+              // Pop về root của stack hiện tại (xóa Cart, Checkout khỏi history)
+              (navigation as any).popToTop();
+              // Rồi navigate sang tab Orders
+              (navigation as any).navigate('Orders');
+            }
+          }]
         );
       } else {
         Alert.alert('Lỗi', response.message || 'Không thể đặt hàng. Vui lòng thử lại.');
