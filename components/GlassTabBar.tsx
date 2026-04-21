@@ -143,25 +143,6 @@ export const GlassTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
       },
       onPanResponderRelease: (_, gestureState) => {
         setIsDragging(false);
-        
-        if (tabLayouts.length === 0) {
-          dragOffset.setValue(0);
-          return;
-        }
-
-        // Find nearest tab based on current position
-        const currentPillCenter = getPillPosition(state.index) + PILL_WIDTH / 2 + gestureState.dx;
-        let nearestIndex = state.index;
-        let minDistance = Infinity;
-
-        tabLayouts.forEach((layout, index) => {
-          const distance = Math.abs(layout.centerX - currentPillCenter);
-          if (distance < minDistance) {
-            minDistance = distance;
-            nearestIndex = index;
-          }
-        });
-
         dragOffset.setValue(0);
 
         // Liquid bounce back
@@ -180,7 +161,32 @@ export const GlassTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
           }),
         ]).start();
 
-        if (nearestIndex !== state.index) {
+        // Calculate which tab to navigate to based on drag distance
+        let nearestIndex = state.index;
+        
+        if (tabLayouts.length > 0) {
+          // Use measured layouts - find tab whose center is closest to drag end position
+          const currentPillX = getPillPosition(state.index);
+          const draggedPillX = currentPillX + gestureState.dx;
+          const draggedPillCenter = draggedPillX + PILL_WIDTH / 2;
+          
+          let minDistance = Infinity;
+          tabLayouts.forEach((layout, index) => {
+            const distance = Math.abs(layout.centerX - draggedPillCenter);
+            if (distance < minDistance) {
+              minDistance = distance;
+              nearestIndex = index;
+            }
+          });
+        } else {
+          // Fallback: calculate based on average tab width
+          const avgTabWidth = TAB_BAR_WIDTH / routeCount;
+          const draggedTabs = Math.round(gestureState.dx / avgTabWidth);
+          nearestIndex = Math.max(0, Math.min(routeCount - 1, state.index + draggedTabs));
+        }
+
+        // Navigate to nearest tab if different from current
+        if (nearestIndex !== state.index && nearestIndex >= 0 && nearestIndex < routeCount) {
           const route = state.routes[nearestIndex];
           if (route) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
