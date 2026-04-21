@@ -3,8 +3,20 @@ import { View, StyleSheet, Platform, TouchableOpacity, Text, Dimensions } from '
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Safely import liquid-glass with fallback
+let LiquidGlassView: any = null;
+let isLiquidGlassSupported = false;
+
+try {
+  const liquidGlass = require('@callstack/liquid-glass');
+  LiquidGlassView = liquidGlass.LiquidGlassView;
+  isLiquidGlassSupported = liquidGlass.isLiquidGlassSupported || false;
+} catch (e) {
+  // Liquid glass not available (Expo Go or not installed)
+  console.log('Liquid glass not available, using BlurView fallback');
+}
 
 const { width } = Dimensions.get('window');
 const BAR_WIDTH = width - 32;
@@ -96,7 +108,7 @@ export const ProductDetailBottomBar: React.FC<ProductDetailBottomBarProps> = ({
         {/* Soft shadow underneath */}
         <View style={styles.shadowLayer} />
 
-        {Platform.OS === 'ios' && isLiquidGlassSupported ? (
+        {Platform.OS === 'ios' && isLiquidGlassSupported && LiquidGlassView ? (
           <LiquidGlassView
             effect="clear"
             interactive={false}
