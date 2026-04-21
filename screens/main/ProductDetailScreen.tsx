@@ -12,6 +12,7 @@ import { stripHtmlTags } from '../../utils/textUtils';
 import { useCartStore } from '../../store/cartStore';
 import { ApiService } from '../../services/api';
 import { ProductCard } from '../../components/ProductCard';
+import { ProductDetailBottomBar } from '../../components/ProductDetailBottomBar';
 
 const { width } = Dimensions.get('window');
 
@@ -242,34 +243,17 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
           )}
         </View>
-        <View style={{ height: 140 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Bottom Bar */}
-      <View style={styles.bottomBar}>
-        <View style={styles.quantityContainer}>
-          <Text style={styles.quantityLabel}>Số lượng:</Text>
-          <View style={styles.quantityControls}>
-            <TouchableOpacity style={styles.quantityButton} onPress={() => setQuantity(Math.max(1, quantity - 1))}>
-              <Ionicons name="remove" size={20} color="#374151" />
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{quantity}</Text>
-            <TouchableOpacity style={styles.quantityButton} onPress={() => setQuantity(quantity + 1)}>
-              <Ionicons name="add" size={20} color="#374151" />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.cartIconButton} onPress={handleAddToCart}>
-            <MaterialCommunityIcons name="cart-plus" size={24} color="#374151" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleBuyNow} style={styles.buyNowButtonFull}>
-            <LinearGradient colors={['#10b981', '#059669']} style={styles.buyNowGradient}>
-              <Text style={styles.buyNowText}>Mua ngay - {formatPrice(product.price * quantity)}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* Liquid Glass Bottom Bar */}
+      <ProductDetailBottomBar
+        quantity={quantity}
+        onQuantityChange={setQuantity}
+        onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
+        price={product.price}
+      />
     </SafeAreaView>
   );
 };
@@ -313,17 +297,6 @@ const styles = StyleSheet.create({
   verifiedText: { fontSize: 11, color: '#16a34a', fontWeight: '600' },
   reviewComment: { fontSize: 14, color: '#4b5563', lineHeight: 20 },
   similarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  bottomBar: { backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#f3f4f6', paddingHorizontal: 16, paddingVertical: 12, paddingBottom: 100 },
-  quantityContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  quantityLabel: { fontSize: 15, fontWeight: '500', color: '#374151' },
-  quantityControls: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f9fafb', borderRadius: 8, padding: 4 },
-  quantityButton: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: 6 },
-  quantityText: { fontSize: 16, fontWeight: '600', color: '#111827', paddingHorizontal: 16 },
-  actionButtons: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  cartIconButton: { width: 48, height: 48, borderRadius: 8, backgroundColor: '#f9fafb', borderWidth: 1, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center' },
-  buyNowButtonFull: { flex: 1 },
-  buyNowGradient: { paddingVertical: 14, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  buyNowText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 });
 
 export default ProductDetailScreen;

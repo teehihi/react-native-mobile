@@ -230,7 +230,7 @@ export const GlassTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
 
   const currentRoute = state.routes[state.index];
   const routeName = getFocusedRouteNameFromRoute(currentRoute) ?? '';
-  const hideTabBar = ['Checkout', 'AddressList', 'AddAddress', 'OrderDetail'].includes(routeName);
+  const hideTabBar = ['Checkout', 'AddressList', 'AddAddress', 'OrderDetail', 'ProductDetail', 'Cart'].includes(routeName);
 
   const handleTabPress = (index: number, route: any, isFocused: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
