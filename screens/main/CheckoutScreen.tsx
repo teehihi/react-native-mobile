@@ -118,10 +118,10 @@ const CheckoutScreen = () => {
       const response = await ApiService.createOrder(orderData);
       if (response.success && response.data) {
         await clearCart();
-        const orderId = response.data.order.id;
+        const orderCode = response.data.order.order_number || response.data.order.code || response.data.order.id;
         Alert.alert(
           'Đặt hàng thành công!',
-          `Mã đơn hàng: ${orderId}\nChúng tôi sẽ xác nhận trong vòng 30 phút.`,
+          `Mã đơn hàng: ${orderCode}\nChúng tôi sẽ xác nhận trong vòng 30 phút.`,
           [{
             text: 'Xem đơn hàng',
             onPress: () => {
