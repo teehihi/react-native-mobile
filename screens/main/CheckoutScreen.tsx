@@ -19,7 +19,7 @@ const CheckoutScreen = () => {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const { selectedAddress, loadAddresses } = useAddressStore();
   
-  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'E_WALLET' | 'BANK_TRANSFER'>('COD');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('COD');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(routeParams.appliedCoupon || null);
@@ -318,6 +318,66 @@ const CheckoutScreen = () => {
             <View style={styles.paymentInfo}>
               <Text style={styles.paymentName}>Thanh toán khi nhận hàng (COD)</Text>
               <Text style={styles.paymentDesc}>Thanh toán bằng tiền mặt khi nhận hàng</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.paymentOption, paymentMethod === 'MOMO' && styles.paymentSelected]}
+            onPress={() => setPaymentMethod('MOMO')}
+          >
+            <Ionicons
+              name={paymentMethod === 'MOMO' ? 'radio-button-on' : 'radio-button-off'}
+              size={24}
+              color={paymentMethod === 'MOMO' ? '#16a34a' : '#9ca3af'}
+            />
+            <View style={styles.paymentInfo}>
+              <Text style={styles.paymentName}>Ví điện tử MoMo</Text>
+              <Text style={styles.paymentDesc}>Thanh toán qua ứng dụng MoMo</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.paymentOption, paymentMethod === 'VNPAY' && styles.paymentSelected]}
+            onPress={() => setPaymentMethod('VNPAY')}
+          >
+            <Ionicons
+              name={paymentMethod === 'VNPAY' ? 'radio-button-on' : 'radio-button-off'}
+              size={24}
+              color={paymentMethod === 'VNPAY' ? '#16a34a' : '#9ca3af'}
+            />
+            <View style={styles.paymentInfo}>
+              <Text style={styles.paymentName}>VNPay</Text>
+              <Text style={styles.paymentDesc}>Thanh toán qua cổng VNPay</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.paymentOption, paymentMethod === 'BANK_TRANSFER' && styles.paymentSelected]}
+            onPress={() => setPaymentMethod('BANK_TRANSFER')}
+          >
+            <Ionicons
+              name={paymentMethod === 'BANK_TRANSFER' ? 'radio-button-on' : 'radio-button-off'}
+              size={24}
+              color={paymentMethod === 'BANK_TRANSFER' ? '#16a34a' : '#9ca3af'}
+            />
+            <View style={styles.paymentInfo}>
+              <Text style={styles.paymentName}>Chuyển khoản ngân hàng</Text>
+              <Text style={styles.paymentDesc}>Chuyển khoản trực tiếp vào số tài khoản</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.paymentOption, paymentMethod === 'CREDIT_CARD' && styles.paymentSelected]}
+            onPress={() => setPaymentMethod('CREDIT_CARD')}
+          >
+            <Ionicons
+              name={paymentMethod === 'CREDIT_CARD' ? 'radio-button-on' : 'radio-button-off'}
+              size={24}
+              color={paymentMethod === 'CREDIT_CARD' ? '#16a34a' : '#9ca3af'}
+            />
+            <View style={styles.paymentInfo}>
+              <Text style={styles.paymentName}>Thẻ tín dụng/Ghi nợ</Text>
+              <Text style={styles.paymentDesc}>Visa, Mastercard, JCB</Text>
             </View>
           </TouchableOpacity>
         </View>

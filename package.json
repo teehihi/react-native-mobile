@@ -20,7 +20,7 @@
     "test-real-device": "node test-real-device.js",
     "update-ip": "node scripts/update-ip.js",
     "auto-ip": "node scripts/auto-ip.js",
-    "setup": "cp .env.example .env && npm run auto-ip"
+    "setup": "node -e \"const fs=require('fs'); if(!fs.existsSync('.env')) fs.copyFileSync('.env.example', '.env')\" && npm run auto-ip"
   },
   "dependencies": {
     "@callstack/liquid-glass": "^0.7.1",

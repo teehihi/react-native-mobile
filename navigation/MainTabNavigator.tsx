@@ -70,6 +70,8 @@ const OrdersStackNavigator = () => {
       <MainStack.Screen name="OrdersMain" component={OrdersScreen} />
       <MainStack.Screen name="OrderDetail" component={OrderDetailScreen} />
       <MainStack.Screen name="WriteReview" component={WriteReviewScreen} />
+      <MainStack.Screen name="AddressList" component={AddressListScreen} />
+      <MainStack.Screen name="AddAddress" component={AddAddressScreen} />
     </MainStack.Navigator>
   );
 };
@@ -85,6 +87,8 @@ const ProfileStackNavigator = () => {
       <ProfileStack.Screen name="ChangePhone" component={ChangePhoneScreen} />
       <ProfileStack.Screen name="Favorites" component={FavoritesScreen} />
       <ProfileStack.Screen name="Coupons" component={CouponsScreen} />
+      <ProfileStack.Screen name="AddressList" component={AddressListScreen} />
+      <ProfileStack.Screen name="AddAddress" component={AddAddressScreen} />
       <ProfileStack.Screen name="Notifications" component={NotificationScreen} />
       <ProfileStack.Screen name="SpendingStats" component={SpendingStatsScreen} />
     </ProfileStack.Navigator>

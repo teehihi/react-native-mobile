@@ -17,24 +17,24 @@ import { Order, OrderStatus } from '../../types/order';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const STATUS_STEPS = [
-  { status: 'PENDING', label: 'Đơn hàng đã được đặt', icon: 'receipt-outline' },
+  { status: 'NEW', label: 'Đơn hàng đã được đặt', icon: 'receipt-outline' },
   { status: 'CONFIRMED', label: 'Đơn hàng đã được xác nhận', icon: 'checkmark-circle-outline' },
-  { status: 'PROCESSING', label: 'Đang đóng gói', icon: 'cube-outline' },
+  { status: 'PREPARING', label: 'Đang đóng gói', icon: 'cube-outline' },
   { status: 'SHIPPING', label: 'Đang giao hàng', icon: 'car-outline' },
   { status: 'DELIVERED', label: 'Giao hàng thành công', icon: 'checkmark-done-outline' },
 ];
 
-const STATUS_ORDER = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPING', 'DELIVERED'];
+const STATUS_ORDER = ['NEW', 'CONFIRMED', 'PREPARING', 'SHIPPING', 'DELIVERED'];
 
 const STATUS_BANNER: Record<string, { label: string; color: string }> = {
+  NEW: { label: 'Chờ xác nhận', color: '#f97316' },
   PENDING: { label: 'Chờ xác nhận', color: '#f97316' },
   CONFIRMED: { label: 'Đã xác nhận', color: '#f97316' },
+  PREPARING: { label: 'Đang đóng gói', color: '#8b5cf6' },
   PROCESSING: { label: 'Đang đóng gói', color: '#8b5cf6' },
   SHIPPING: { label: 'Đang giao hàng', color: '#3b82f6' },
   DELIVERED: { label: 'Giao hàng thành công', color: '#16a34a' },
   CANCELLED: { label: 'Đã hủy', color: '#ef4444' },
-  NEW: { label: 'Mới', color: '#f97316' },
-  PREPARING: { label: 'Đang chuẩn bị', color: '#8b5cf6' },
   CANCEL_REQUESTED: { label: 'Yêu cầu hủy', color: '#ef4444' },
 };
 
@@ -119,7 +119,7 @@ const OrderDetailScreen = () => {
 
   const getStepTimestamp = (step: typeof STATUS_STEPS[0], order: Order): string => {
     switch (step.status) {
-      case 'PENDING': return formatDateTime(order.createdAt);
+      case 'NEW': return formatDateTime(order.createdAt);
       case 'CONFIRMED': return formatDateTime(order.confirmedAt);
       case 'DELIVERED': return formatDateTime(order.deliveredAt);
       default: return '';
@@ -185,7 +185,7 @@ const OrderDetailScreen = () => {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }}>
 
         {/* Status Banner */}
-        {order.status !== 'CANCELLED' && (
+        {order.status !== 'CANCELLED' && order.status !== 'CANCEL_REQUESTED' && (
           <View style={{
             backgroundColor: bannerCfg.color,
             marginHorizontal: 16,
@@ -219,7 +219,7 @@ const OrderDetailScreen = () => {
         )}
 
         {/* Timeline */}
-        {order.status !== 'CANCELLED' ? (
+        {order.status !== 'CANCELLED' && order.status !== 'CANCEL_REQUESTED' ? (
           <View style={{ backgroundColor: '#fff', marginHorizontal: 16, marginTop: 12, borderRadius: 12, padding: 16 }}>
             <Text style={{ fontWeight: '700', fontSize: 16, color: '#1f2937', marginBottom: 16 }}>
               Trạng thái đơn hàng
@@ -281,7 +281,9 @@ const OrderDetailScreen = () => {
                 <Ionicons name="close-circle" size={20} color="#ef4444" />
               </View>
               <View>
-                <Text style={{ fontWeight: '700', color: '#ef4444', fontSize: 15 }}>Đơn hàng đã bị hủy</Text>
+                <Text style={{ fontWeight: '700', color: '#ef4444', fontSize: 15 }}>
+                  {order.status === 'CANCEL_REQUESTED' ? 'Đang yêu cầu hủy đơn' : 'Đơn hàng đã bị hủy'}
+                </Text>
                 {order.cancelledAt && (
                   <Text style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>{formatDateTime(order.cancelledAt)}</Text>
                 )}
@@ -399,7 +401,16 @@ const OrderDetailScreen = () => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
             <Text style={{ color: '#6b7280', fontSize: 13 }}>Phương thức thanh toán</Text>
             <Text style={{ color: '#1f2937', fontSize: 13, fontWeight: '500' }}>
-              {order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng' : order.paymentMethod}
+              {(() => {
+                switch (order.paymentMethod) {
+                  case 'COD': return 'Thanh toán khi nhận hàng';
+                  case 'MOMO': return 'Ví điện tử MoMo';
+                  case 'VNPAY': return 'VNPay';
+                  case 'BANK_TRANSFER': return 'Chuyển khoản ngân hàng';
+                  case 'CREDIT_CARD': return 'Thẻ tín dụng/Ghi nợ';
+                  default: return order.paymentMethod;
+                }
+              })()}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>

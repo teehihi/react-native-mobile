@@ -17,6 +17,8 @@ import { Product as ApiProduct } from '../../types/api';
 import { ApiService, getProductImage } from '../../services/api';
 import { NavigationProps } from '../../types/navigation';
 import { stripHtmlTags } from '../../utils/textUtils';
+import { useCartStore } from '../../store/cartStore';
+import { Alert } from 'react-native';
 
 interface FilterState {
   categories: string[];
@@ -41,6 +43,7 @@ interface SearchScreenProps extends NavigationProps {
 const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
   const initialQuery = route?.params?.initialQuery || '';
   const initialCategory = route?.params?.category || '';
+  const addItem = useCartStore((state) => state.addItem);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [showFilters, setShowFilters] = useState(false);
   const [products, setProducts] = useState<ApiProduct[]>([]);
@@ -158,6 +161,22 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
     }).format(price);
   };
 
+  const handleAddToCart = async (product: ApiProduct) => {
+    try {
+      await addItem(
+        product.id,
+        product.name,
+        product.imageUrl,
+        product.price,
+        product.originalPrice,
+        product.category
+      );
+      Alert.alert('Thành công', `Đã thêm ${product.name} vào giỏ hàng`);
+    } catch (error) {
+      Alert.alert('Lỗi', 'Không thể thêm sản phẩm vào giỏ hàng');
+    }
+  };
+
   const renderProduct = ({ item }: { item: ApiProduct }) => {
     // Remove HTML tags from description
     const cleanDescription = stripHtmlTags(item.description);
@@ -185,7 +204,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ route, navigation }) => {
             style={styles.addToCartButton}
             onPress={(e) => {
               e.stopPropagation();
-              // TODO: Add to cart logic
+              handleAddToCart(item);
             }}
           >
             <Ionicons name="add" size={16} color="#ffffff" />

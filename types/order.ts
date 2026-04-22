@@ -10,7 +10,7 @@ export type OrderStatus =
   | 'PREPARING'        // legacy
   | 'CANCEL_REQUESTED'; // Yêu cầu hủy đơn
 
-export type PaymentMethod = 'COD' | 'E_WALLET' | 'BANK_TRANSFER';
+export type PaymentMethod = 'COD' | 'MOMO' | 'VNPAY' | 'BANK_TRANSFER' | 'CREDIT_CARD';
 
 export interface OrderItem {
   productId: number;

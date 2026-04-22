@@ -8,12 +8,47 @@ function getLocalIP() {
     const platform = os.platform();
 
     if (platform === 'win32') {
-      // Windows: sử dụng ipconfig
-      const output = execSync('ipconfig | findstr /i "IPv4"', { encoding: 'utf8' });
-      const match = output.match(/(\d+\.\d+\.\d+\.\d+)/);
-      if (match) {
-        return match[1];
+      // Windows: sử dụng ipconfig và lọc theo Adapter
+      const output = execSync('ipconfig', { encoding: 'utf8' });
+      const adapters = output.split(/\r?\n\r?\n/);
+      
+      let preferredIp = null;
+      let wifiIp = null;
+      let otherIps = [];
+      
+      for (let adapter of adapters) {
+        const isWifi = adapter.toLowerCase().includes('wi-fi') || adapter.toLowerCase().includes('wireless');
+        const lines = adapter.split('\n');
+        
+        for (let line of lines) {
+          if (line.includes('IPv4 Address')) {
+            const match = line.match(/(\d+\.\d+\.\d+\.\d+)/);
+            if (match) {
+              const ip = match[1];
+              // Ưu tiên tuyệt đối dải 192.168.1.x (Wi-Fi thật)
+              if (ip.startsWith('192.168.1.')) {
+                preferredIp = ip;
+                break;
+              }
+              // Bỏ qua Radmin và VMware dải 192.168.192 / 192.168.27
+              if (!ip.startsWith('26.') && !ip.startsWith('127.') && !ip.startsWith('192.168.192.') && !ip.startsWith('192.168.27.')) {
+                if (isWifi) {
+                  wifiIp = ip;
+                } else {
+                  otherIps.push(ip);
+                }
+              }
+            }
+          }
+        }
+        if (preferredIp) break;
       }
+      
+      if (preferredIp) return preferredIp;
+      if (wifiIp) return wifiIp;
+      if (otherIps.length > 0) return otherIps[0];
+      
+      return '192.168.1.35'; // Fallback
     } else {
       // macOS/Linux: sử dụng ifconfig
       const output = execSync('ifconfig | grep "inet " | grep -v 127.0.0.1', { encoding: 'utf8' });

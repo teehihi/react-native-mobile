@@ -22,10 +22,10 @@ type TabKey = 'ALL' | 'PENDING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED';
 
 const TABS: { key: TabKey; label: string; statuses: OrderStatus[] }[] = [
   { key: 'ALL', label: 'Tất cả', statuses: [] },
-  { key: 'PENDING', label: 'Chờ xác nhận', statuses: ['PENDING', 'CONFIRMED', 'PROCESSING'] },
-  { key: 'SHIPPING', label: 'Đang giao', statuses: ['SHIPPING'] },
-  { key: 'DELIVERED', label: 'Hoàn thành', statuses: ['DELIVERED'] },
-  { key: 'CANCELLED', label: 'Đã hủy', statuses: ['CANCELLED'] },
+  { key: 'PENDING', label: 'Chờ xác nhận', statuses: ['NEW', 'PENDING', 'CONFIRMED', 'PROCESSING', 'PREPARING'] },
+  { key: 'SHIPPING', label: 'Đang giao', statuses: ['SHIPPING', 'SHIPPED'] },
+  { key: 'DELIVERED', label: 'Hoàn thành', statuses: ['DELIVERED', 'COMPLETE', 'complete'] },
+  { key: 'CANCELLED', label: 'Đã hủy', statuses: ['CANCELLED', 'CANCEL_REQUESTED'] },
 ];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; icon: string }> = {
@@ -171,10 +171,10 @@ const OrdersScreen = () => {
 
   const getStatusIcon = (status: OrderStatus) => {
     const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.PENDING;
-    if (status === 'DELIVERED') return { name: 'checkmark-circle', color: '#16a34a' };
-    if (status === 'CANCELLED') return { name: 'close-circle', color: '#ef4444' };
-    if (status === 'SHIPPING') return { name: 'cube-outline', color: '#3b82f6' };
-    return { name: 'cube-outline', color: '#f97316' };
+    if (status === 'DELIVERED') return { name: 'checkmark-circle', color: cfg.color };
+    if (status === 'CANCELLED' || status === 'CANCEL_REQUESTED') return { name: 'close-circle', color: cfg.color };
+    if (status === 'SHIPPING') return { name: 'car', color: cfg.color };
+    return { name: cfg.icon.replace('-outline', ''), color: cfg.color };
   };
 
   const renderOrderCard = (order: Order) => {
