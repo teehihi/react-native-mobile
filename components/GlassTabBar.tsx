@@ -321,7 +321,7 @@ export const GlassTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
           <View style={styles.glassContainer} {...panResponder.panHandlers}>
             {/* Nav bar background */}
             <LiquidGlassView
-              effect="clear"
+              effect="regular"
               interactive={false}
               style={[StyleSheet.absoluteFill, { borderRadius: 36 }]}
             />
