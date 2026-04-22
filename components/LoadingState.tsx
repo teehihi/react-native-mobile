@@ -1,0 +1,36 @@
+import React from 'react';
+import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+
+interface LoadingStateProps {
+  message?: string;
+  size?: 'small' | 'large';
+  color?: string;
+}
+
+export const LoadingState: React.FC<LoadingStateProps> = ({ 
+  message = 'Đang tải...', 
+  size = 'large',
+  color = '#FF6B6B'
+}) => {
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size={size} color={color} />
+      {message && <Text style={styles.message}>{message}</Text>}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  message: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+});

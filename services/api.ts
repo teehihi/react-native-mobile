@@ -64,9 +64,21 @@ export const formatImageUrl = (imageUrl: string | null | undefined): string => {
 
 // Helper function to get image with fallback to placeholder
 export const getProductImage = (imageUrl: string | null | undefined, category: string, productName?: string, productId?: number): string => {
-  // For development, always use placeholder since images don't exist
-  // In production, you would try the real URL first
+  // Try to use real image URL from backend first
+  if (imageUrl) {
+    // If already a full URL, return as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // If relative path, prepend server URL
+    const formattedUrl = formatImageUrl(imageUrl);
+    if (formattedUrl) {
+      return formattedUrl;
+    }
+  }
   
+  // Fallback to placeholder if no image URL
   if (productId) {
     // Use consistent placeholder based on product ID
     const seed = productId.toString();

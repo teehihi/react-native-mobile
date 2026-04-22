@@ -148,7 +148,8 @@ export const HomepageHeader: React.FC<HomepageHeaderProps> = ({ user, onAvatarPr
             )}
           </TouchableOpacity>
 
-          {/* User Avatar */}          <TouchableOpacity 
+          {/* User Avatar */}
+          <TouchableOpacity 
             className="w-11 h-11 rounded-full overflow-hidden border-2 border-white ml-2"
             onPress={onAvatarPress}
             activeOpacity={0.7}

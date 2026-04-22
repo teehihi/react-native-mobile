@@ -22,8 +22,10 @@ interface Props {
 }
 
 const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { product } = route.params;
+  const { product: initialProduct } = route.params;
   const { addItem } = useCartStore();
+  const [product, setProduct] = useState<ApiProduct>(initialProduct);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -32,13 +34,39 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [similarProducts, setSimilarProducts] = useState<ApiProduct[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
 
-  const productImages = [
-    getProductImage(product.imageUrl, product.category, product.name, product.id),
-    getProductImage(product.imageUrl, product.category, product.name, product.id + 1000),
-    getProductImage(product.imageUrl, product.category, product.name, product.id + 2000),
-  ];
+  // Build product images array from available images
+  const productImages = React.useMemo(() => {
+    const images: string[] = [];
+    
+    // Priority 1: Use images from product_images table if available
+    if (product.images && product.images.length > 0) {
+      console.log('📸 Using images from product_images table:', product.images.length);
+      product.images.forEach(img => {
+        images.push(getProductImage(img.imageUrl, product.category, product.name, product.id));
+      });
+      return images;
+    }
+    
+    // Priority 2: Use main image and story image
+    if (product.imageUrl) {
+      images.push(getProductImage(product.imageUrl, product.category, product.name, product.id));
+    }
+    
+    if (product.storyImageUrl && product.storyImageUrl !== product.imageUrl) {
+      images.push(getProductImage(product.storyImageUrl, product.category, product.name, product.id));
+    }
+    
+    // If we have 0 images, add a placeholder
+    if (images.length === 0) {
+      images.push(getProductImage('', product.category, product.name, product.id));
+    }
+    
+    return images;
+  }, [product.images, product.imageUrl, product.storyImageUrl, product.category, product.name, product.id]);
 
   useEffect(() => {
+    // Load full product detail with images
+    loadProductDetail();
     // Track view
     ApiService.trackProductView(product.id);
     // Load reviews, stats, similar, favorite status
@@ -46,6 +74,21 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     loadSimilar();
     loadFavoriteStatus();
   }, [product.id]);
+
+  const loadProductDetail = async () => {
+    try {
+      setLoadingDetail(true);
+      const res = await ApiService.getProductById(product.id);
+      if (res.success && res.data) {
+        console.log('✅ Loaded product detail with images:', res.data.images?.length || 0);
+        setProduct(res.data);
+      }
+    } catch (error) {
+      console.error('❌ Failed to load product detail:', error);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
 
   const loadReviews = async () => {
     setLoadingReviews(true);
@@ -135,11 +178,13 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               <Image key={i} source={{ uri: img }} style={styles.productImage} resizeMode="cover" />
             ))}
           </ScrollView>
-          <View style={styles.imageIndicators}>
-            {productImages.map((_, i) => (
-              <View key={i} style={[styles.indicator, selectedImageIndex === i && styles.activeIndicator]} />
-            ))}
-          </View>
+          {productImages.length > 1 && (
+            <View style={styles.imageIndicators}>
+              {productImages.map((_, i) => (
+                <View key={i} style={[styles.indicator, selectedImageIndex === i && styles.activeIndicator]} />
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Product Info */}

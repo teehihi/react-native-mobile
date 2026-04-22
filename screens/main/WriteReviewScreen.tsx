@@ -7,13 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ApiService } from '../../services/api';
+import { ApiService, getProductImage } from '../../services/api';
 
 const WriteReviewScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { orderId, productId, productName, productImage } = route.params as {
-    orderId: number; productId: number; productName: string; productImage: string;
+  const { orderId, productId, productName, productImage, category } = route.params as {
+    orderId: number; productId: number; productName: string; productImage: string; category?: string;
   };
 
   const [rating, setRating] = useState(5);
@@ -61,7 +61,17 @@ const WriteReviewScreen = () => {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         {/* Product info */}
         <View style={{ backgroundColor: 'white', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-          <Image source={{ uri: `https://picsum.photos/seed/${productId}/100/100` }} style={{ width: 64, height: 64, borderRadius: 8 }} />
+          <Image 
+            source={{ 
+              uri: getProductImage(
+                productImage || '',
+                category || '',
+                productName,
+                productId
+              )
+            }} 
+            style={{ width: 64, height: 64, borderRadius: 8 }} 
+          />
           <Text style={{ flex: 1, marginLeft: 12, fontSize: 15, fontWeight: '600', color: '#1f2937' }} numberOfLines={2}>{productName}</Text>
         </View>
 

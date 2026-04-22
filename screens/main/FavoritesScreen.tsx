@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { ApiService } from '../../services/api';
+import { ApiService, getProductImage } from '../../services/api';
 
 const FavoritesScreen = () => {
   const navigation = useNavigation();
@@ -38,7 +38,17 @@ const FavoritesScreen = () => {
       style={{ backgroundColor: 'white', marginHorizontal: 16, marginBottom: 12, borderRadius: 12, flexDirection: 'row', padding: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }}
       onPress={() => navigation.navigate('ProductDetail' as never, { product: item } as never)}
     >
-      <Image source={{ uri: `https://picsum.photos/seed/${item.id}/200/200` }} style={{ width: 80, height: 80, borderRadius: 8 }} />
+      <Image 
+        source={{ 
+          uri: getProductImage(
+            item.image_url || item.imageUrl || '',
+            item.category_name || item.category || '',
+            item.name,
+            item.id
+          )
+        }} 
+        style={{ width: 80, height: 80, borderRadius: 8 }} 
+      />
       <View style={{ flex: 1, marginLeft: 12, justifyContent: 'space-between' }}>
         <Text style={{ fontSize: 14, fontWeight: '600', color: '#1f2937' }} numberOfLines={2}>{item.name}</Text>
         <Text style={{ fontSize: 12, color: '#6b7280' }}>{item.category_name}</Text>

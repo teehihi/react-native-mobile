@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCartStore } from '../../store/cartStore';
-import { formatImageUrl, ApiService } from '../../services/api';
+import { formatImageUrl, ApiService, getProductImage } from '../../services/api';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const CartScreen = () => {
@@ -179,7 +179,14 @@ const CartScreen = () => {
             <View key={item.id} style={styles.cartItem}>
               <View style={styles.imageContainer}>
                 <Image
-                  source={{ uri: `https://picsum.photos/seed/${item.productId}/200/200` }}
+                  source={{ 
+                    uri: getProductImage(
+                      item.productImage || '',
+                      item.category || '',
+                      item.productName,
+                      item.productId
+                    )
+                  }}
                   style={styles.productImage}
                   resizeMode="cover"
                 />

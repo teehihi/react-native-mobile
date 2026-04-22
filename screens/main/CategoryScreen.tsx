@@ -1,37 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, StatusBar, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, TouchableOpacity, Text, StatusBar, FlatList, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ApiService } from '../../services/api';
 import { NavigationProps } from '../../types/navigation';
 import { Product } from '../../types/api';
-import { ProductCard } from '../../components/ProductCard';
+import { ProductGlassCard } from '../../components/ProductGlassCard';
 
 interface CategoryScreenProps extends NavigationProps {
   route: {
     params: {
       categoryName: string;
+      categoryId?: number | string;
     };
   };
 }
 
 const CategoryScreen: React.FC<CategoryScreenProps> = ({ navigation, route }) => {
-  const { categoryName } = route.params;
+  const { categoryName, categoryId } = route.params;
+  const insets = useSafeAreaInsets();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  
-  // Filter states
-  const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest');
-  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({ min: 0, max: 1000000 });
   const [showFilters, setShowFilters] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('newest');
 
   useEffect(() => {
     loadProducts(true);
-  }, [categoryName, sortBy]);
+  }, [categoryName, categoryId]);
 
   const loadProducts = async (reset: boolean = false) => {
     try {
@@ -44,11 +43,10 @@ const CategoryScreen: React.FC<CategoryScreenProps> = ({ navigation, route }) =>
       }
 
       const currentPage = reset ? 1 : page;
+      const categoryParam = categoryId ? categoryId.toString() : categoryName;
+      
       const response = await ApiService.getProducts({
-        category: categoryName,
-        sort: sortBy,
-        minPrice: priceRange.min > 0 ? priceRange.min : undefined,
-        maxPrice: priceRange.max < 1000000 ? priceRange.max : undefined,
+        category: categoryParam,
         page: currentPage,
         limit: 20
       });
@@ -62,18 +60,15 @@ const CategoryScreen: React.FC<CategoryScreenProps> = ({ navigation, route }) =>
           setProducts(prev => [...prev, ...newProducts]);
         }
 
-        // Check if there are more products
         setHasMore(newProducts.length === 20);
         
         if (!reset) {
           setPage(currentPage + 1);
         }
       } else {
-        console.error('❌ Category products failed:', response?.message);
         if (reset) setProducts([]);
       }
     } catch (error: any) {
-      console.error('❌ Category products error:', error?.message);
       if (reset) setProducts([]);
     } finally {
       setLoading(false);
@@ -81,10 +76,10 @@ const CategoryScreen: React.FC<CategoryScreenProps> = ({ navigation, route }) =>
     }
   };
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
     loadProducts(true).finally(() => setRefreshing(false));
-  }, [categoryName, sortBy, priceRange]);
+  }, [categoryName, categoryId]);
 
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
@@ -92,189 +87,251 @@ const CategoryScreen: React.FC<CategoryScreenProps> = ({ navigation, route }) =>
     }
   };
 
-  const handleProductPress = (product: Product) => {
+  const handleProductPress = useCallback((product: Product) => {
     navigation.navigate('ProductDetail', { product });
-  };
+  }, [navigation]);
 
-  const handleSortChange = (newSort: 'newest' | 'price_asc' | 'price_desc') => {
-    setSortBy(newSort);
-    setShowFilters(false);
-  };
-
-  const applyPriceFilter = () => {
-    setShowFilters(false);
-    loadProducts(true);
-  };
-
-  const resetFilters = () => {
-    setSortBy('newest');
-    setPriceRange({ min: 0, max: 1000000 });
-    setShowFilters(false);
-    loadProducts(true);
-  };
-
-  const renderProduct = ({ item }: { item: Product }) => (
-    <ProductCard 
+  const renderProduct = useCallback(({ item }: { item: Product }) => (
+    <ProductGlassCard 
       product={item} 
       onPress={() => handleProductPress(item)}
-      style={{ width: '48%', marginBottom: 16 }}
+      style={{ flex: 1, marginHorizontal: 6, marginBottom: 16, maxWidth: '47%' }}
     />
-  );
+  ), [handleProductPress]);
 
-  const sortOptions: Array<{key: 'newest' | 'price_asc' | 'price_desc', label: string, icon: string}> = [
-    { key: 'newest', label: 'Mới nhất', icon: 'clock-outline' },
-    { key: 'price_asc', label: 'Giá thấp đến cao', icon: 'arrow-up' },
-    { key: 'price_desc', label: 'Giá cao đến thấp', icon: 'arrow-down' },
-  ];
+  const sortedProducts = useMemo(() => {
+    let sorted = [...products];
+    if (activeFilter === 'price_asc') {
+      sorted.sort((a, b) => a.price - b.price);
+    } else if (activeFilter === 'price_desc') {
+      sorted.sort((a, b) => b.price - a.price);
+    }
+    return sorted;
+  }, [products, activeFilter]);
 
-  const priceRanges = [
-    { min: 0, max: 50000, label: 'Dưới 50k' },
-    { min: 50000, max: 100000, label: '50k - 100k' },
-    { min: 100000, max: 200000, label: '100k - 200k' },
-    { min: 200000, max: 1000000, label: 'Trên 200k' },
-  ];
-
-  return (
-    <>
-      <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
-      <SafeAreaView className="flex-1 bg-gray-50">
-        {/* Header */}
-        <View className="bg-green-600 px-4 py-3">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center flex-1">
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                className="mr-3"
-                activeOpacity={0.7}
-              >
-                <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
-              </TouchableOpacity>
-              <Text className="text-white text-lg font-bold flex-1" numberOfLines={1}>
-                {categoryName}
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => setShowFilters(!showFilters)}
-              className="ml-3"
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons name="filter-variant" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-          
-          {/* Product count */}
-          <Text className="text-green-100 text-sm mt-1">
-            {products.length} sản phẩm
+  const renderHeader = () => (
+    <View style={[styles.headerContainer, { paddingTop: insets.top || 16 }]}>
+      <View style={styles.headerContent}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
+        </TouchableOpacity>
+        
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {categoryName}
+          </Text>
+          <Text style={styles.headerSubtitle}>
+            {loading ? 'Đang tải...' : `${products.length} sản phẩm`}
           </Text>
         </View>
 
-        {/* Filters Panel */}
-        {showFilters && (
-          <View className="bg-white border-b border-gray-200 p-4">
-            {/* Sort Options */}
-            <Text className="font-semibold text-gray-900 mb-3">Sắp xếp theo</Text>
-            <View className="flex-row flex-wrap mb-4">
-              {sortOptions.map((option) => (
+        <TouchableOpacity 
+          style={[styles.filterButton, showFilters && styles.filterButtonActive]} 
+          activeOpacity={0.8}
+          onPress={() => setShowFilters(!showFilters)}
+        >
+          <MaterialCommunityIcons 
+            name={showFilters ? "close" : "filter-variant"} 
+            size={showFilters ? 22 : 20} 
+            color={showFilters ? "white" : "#111827"} 
+            style={showFilters ? { marginTop: 2 } : {}}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {showFilters && (
+        <View style={styles.filterPanel}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+            {['newest', 'price_asc', 'price_desc'].map((filterType) => {
+              const labels: Record<string, string> = {
+                newest: 'Mới nhất',
+                price_asc: 'Giá thấp → cao',
+                price_desc: 'Giá cao → thấp'
+              };
+              const isActive = activeFilter === filterType;
+              return (
                 <TouchableOpacity
-                  key={option.key}
-                  onPress={() => handleSortChange(option.key)}
-                  className={`flex-row items-center mr-4 mb-2 px-3 py-2 rounded-full border ${
-                    sortBy === option.key 
-                      ? 'bg-green-100 border-green-500' 
-                      : 'bg-gray-100 border-gray-300'
-                  }`}
-                  activeOpacity={0.7}
+                  key={filterType}
+                  style={[styles.filterChip, isActive && styles.filterChipActive]}
+                  onPress={() => setActiveFilter(filterType)}
                 >
-                  <MaterialCommunityIcons 
-                    name={option.icon as any} 
-                    size={16} 
-                    color={sortBy === option.key ? '#16a34a' : '#6b7280'} 
-                  />
-                  <Text className={`ml-2 text-sm ${
-                    sortBy === option.key ? 'text-green-700 font-medium' : 'text-gray-700'
-                  }`}>
-                    {option.label}
+                  <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
+                    {labels[filterType]}
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
+    </View>
+  );
 
-            {/* Price Range */}
-            <Text className="font-semibold text-gray-900 mb-3">Khoảng giá</Text>
-            <View className="flex-row flex-wrap mb-4">
-              {priceRanges.map((range, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => setPriceRange({ min: range.min, max: range.max })}
-                  className={`mr-3 mb-2 px-3 py-2 rounded-full border ${
-                    priceRange.min === range.min && priceRange.max === range.max
-                      ? 'bg-green-100 border-green-500' 
-                      : 'bg-gray-100 border-gray-300'
-                  }`}
-                  activeOpacity={0.7}
-                >
-                  <Text className={`text-sm ${
-                    priceRange.min === range.min && priceRange.max === range.max
-                      ? 'text-green-700 font-medium' 
-                      : 'text-gray-700'
-                  }`}>
-                    {range.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#00B14F" />
+      
+      {renderHeader()}
 
-            {/* Filter Actions */}
-            <View className="flex-row justify-between">
-              <TouchableOpacity
-                onPress={resetFilters}
-                className="flex-1 mr-2 py-2 px-4 border border-gray-300 rounded-lg"
-                activeOpacity={0.7}
-              >
-                <Text className="text-center text-gray-700 font-medium">Đặt lại</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={applyPriceFilter}
-                className="flex-1 ml-2 py-2 px-4 bg-green-600 rounded-lg"
-                activeOpacity={0.7}
-              >
-                <Text className="text-center text-white font-medium">Áp dụng</Text>
-              </TouchableOpacity>
-            </View>
+      <View style={styles.contentContainer}>
+        {loading ? (
+          <View style={styles.centerContainer}>
+            <MaterialCommunityIcons name="loading" size={32} color="#00B14F" />
+            <Text style={styles.loadingText}>Đang tải...</Text>
           </View>
-        )}
-
-        {/* Products Grid */}
-        <FlatList
-          data={products}
-          renderItem={renderProduct}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 16 }}
-          contentContainerStyle={{ paddingTop: 16, paddingBottom: 120 }}
-          showsVerticalScrollIndicator={false}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            loadingMore ? (
-              <View className="py-4">
-                <Text className="text-center text-gray-500">Đang tải thêm...</Text>
+        ) : (
+          <FlatList
+            data={sortedProducts}
+            renderItem={renderProduct}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            columnWrapperStyle={styles.columnWrapper}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              loadingMore ? (
+                <View style={styles.loadingMoreContainer}>
+                  <MaterialCommunityIcons name="loading" size={24} color="#00B14F" />
+                </View>
+              ) : null
+            }
+            ListEmptyComponent={
+              <View style={styles.centerContainer}>
+                <MaterialCommunityIcons name="package-variant" size={48} color="#9CA3AF" />
+                <Text style={styles.emptyText}>Chưa có sản phẩm nào</Text>
               </View>
-            ) : null
-          }
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center py-20">
-              <MaterialCommunityIcons name="package-variant" size={64} color="#d1d5db" />
-              <Text className="text-gray-500 text-lg mt-4">Không có sản phẩm nào</Text>
-              <Text className="text-gray-400 text-sm mt-1">Thử thay đổi bộ lọc</Text>
-            </View>
-          }
-        />
-      </SafeAreaView>
-    </>
+            }
+          />
+        )}
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F3F4F6', // Darker background to make white cards pop
+  },
+  headerContainer: {
+    backgroundColor: '#00B14F', // Grab Green
+    paddingBottom: 16,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  backButton: {
+    padding: 4,
+    marginRight: 12,
+  },
+  headerTitleContainer: {
+    flex: 1,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  headerSubtitle: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  filterButton: {
+    width: 36,
+    height: 36,
+    backgroundColor: 'white',
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  filterButtonActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)', // Translucent white
+    // Removed border to avoid offset issues
+  },
+  filterPanel: {
+    backgroundColor: '#00B14F',
+    paddingTop: 16,
+    paddingBottom: 0,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+  },
+  filterScroll: {
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
+  },
+  filterChip: {
+    backgroundColor: 'white',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  filterChipActive: {
+    backgroundColor: '#E8F5E9', // Light green bg
+    borderWidth: 1,
+    borderColor: '#00B14F',
+  },
+  filterChipText: {
+    color: '#4B5563',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  filterChipTextActive: {
+    color: '#00B14F',
+    fontWeight: 'bold',
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 10,
+    paddingTop: 16,
+    paddingBottom: 40,
+  },
+  columnWrapper: {
+    justifyContent: 'flex-start',
+    paddingHorizontal: 4,
+  },
+  centerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#6B7280',
+    fontSize: 14,
+  },
+  emptyText: {
+    marginTop: 12,
+    color: '#6B7280',
+    fontSize: 15,
+  },
+  loadingMoreContainer: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+});
 
 export default CategoryScreen;

@@ -9,7 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCartStore } from '../../store/cartStore';
 import { useAddressStore } from '../../store/addressStore';
-import { ApiService } from '../../services/api';
+import { ApiService, getProductImage } from '../../services/api';
 
 const CheckoutScreen = () => {
   const navigation = useNavigation();
@@ -199,7 +199,14 @@ const CheckoutScreen = () => {
           {items.map((item) => (
             <View key={item.id} style={styles.productItem}>
               <Image
-                source={{ uri: `https://picsum.photos/seed/${item.productId}/200/200` }}
+                source={{ 
+                  uri: getProductImage(
+                    item.productImage || '',
+                    item.category || '',
+                    item.productName,
+                    item.productId
+                  )
+                }}
                 style={styles.productImage}
               />
               <View style={styles.productInfo}>

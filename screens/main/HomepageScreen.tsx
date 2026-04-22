@@ -114,9 +114,12 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
     navigation.navigate('ProductDetail', { product });
   };
 
-  const handleCategoryPress = (categoryName: string) => {
-    // Navigate to Category screen
-    (navigation as any).navigate('Category', { categoryName });
+  const handleCategoryPress = (category: Category) => {
+    // Navigate to Category screen with both name and ID
+    (navigation as any).navigate('Category', { 
+      categoryName: category.name,
+      categoryId: category.id 
+    });
   };
 
   const handleViewAllCategories = () => {

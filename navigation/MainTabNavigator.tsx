@@ -6,7 +6,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { 
   HomepageScreen, 
   SearchScreen, 
-  CategoryScreen,
   CartScreen,
   ProductDetailScreen,
   CheckoutScreen,
@@ -20,6 +19,7 @@ import {
   ChangeEmailScreen,
   ChangePhoneScreen 
 } from '../screens';
+import CategoryScreen from '../screens/main/CategoryScreen';
 import FavoritesScreen from '../screens/main/FavoritesScreen';
 import WriteReviewScreen from '../screens/main/WriteReviewScreen';
 import CouponsScreen from '../screens/main/CouponsScreen';
@@ -36,7 +36,7 @@ const MainStackNavigator = () => {
   return (
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
       <MainStack.Screen name="HomepageMain" component={HomepageScreen} />
-      <MainStack.Screen name="Category" component={CategoryScreen} />
+      <MainStack.Screen name="Category" component={CategoryScreen as any} />
       <MainStack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <MainStack.Screen name="Cart" component={CartScreen} />
       <MainStack.Screen name="Checkout" component={CheckoutScreen} />
@@ -53,7 +53,7 @@ const SearchStackNavigator = () => {
   return (
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
       <MainStack.Screen name="SearchMain" component={SearchScreen} />
-      <MainStack.Screen name="Category" component={CategoryScreen} />
+      <MainStack.Screen name="Category" component={CategoryScreen as any} />
       <MainStack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <MainStack.Screen name="Cart" component={CartScreen} />
       <MainStack.Screen name="Checkout" component={CheckoutScreen} />

@@ -126,6 +126,14 @@ export interface UpdatePhoneRequest {
 }
 
 // Product types
+export interface ProductImage {
+  id: number;
+  imageUrl: string;
+  displayOrder: number;
+  isPrimary: boolean;
+  altText?: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -134,6 +142,8 @@ export interface Product {
   originalPrice?: number;
   category: string;
   imageUrl: string;
+  storyImageUrl?: string;
+  images?: ProductImage[];
   rating: number;
   soldCount: number;
   isActive: boolean;
@@ -142,6 +152,7 @@ export interface Product {
 }
 
 export interface Category {
+  id: number;
   name: string;
   productCount: number;
 }

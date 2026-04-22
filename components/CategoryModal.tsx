@@ -18,7 +18,7 @@ interface CategoryModalProps {
   visible: boolean;
   categories: Category[];
   onClose: () => void;
-  onCategoryPress: (categoryName: string) => void;
+  onCategoryPress: (category: Category) => void;
 }
 
 // Icon mapping for categories (same as CategorySlider)
@@ -70,8 +70,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   onClose,
   onCategoryPress
 }) => {
-  const handleCategoryPress = (categoryName: string) => {
-    onCategoryPress(categoryName);
+  const handleCategoryPress = (category: Category) => {
+    onCategoryPress(category);
     onClose();
   };
 
@@ -98,7 +98,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 key={category.name}
                 className="items-center mb-6"
                 style={{ width: ITEM_WIDTH }}
-                onPress={() => handleCategoryPress(category.name)}
+                onPress={() => handleCategoryPress(category)}
                 activeOpacity={0.7}
               >
                 <View 

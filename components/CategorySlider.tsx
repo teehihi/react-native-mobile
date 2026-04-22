@@ -7,7 +7,7 @@ const { width } = Dimensions.get('window');
 
 interface CategorySliderProps {
   categories: Category[];
-  onCategoryPress: (categoryName: string) => void;
+  onCategoryPress: (category: Category) => void;
   onViewAllPress: () => void;
 }
 
@@ -96,7 +96,7 @@ export const CategorySlider: React.FC<CategorySliderProps> = ({
         key={isViewAll ? 'view-all' : item.name}
         className="items-center mb-4"
         style={{ width: '25%' }}
-        onPress={() => isViewAll ? onViewAllPress() : onCategoryPress(item.name)}
+        onPress={() => isViewAll ? onViewAllPress() : onCategoryPress(item)}
         activeOpacity={0.7}
       >
         <View 

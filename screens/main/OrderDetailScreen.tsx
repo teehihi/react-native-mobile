@@ -12,9 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { ApiService } from '../../services/api';
+import { ApiService, getProductImage } from '../../services/api';
 import { Order, OrderStatus } from '../../types/order';
-import { formatImageUrl } from '../../services/api';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
 const OrderDetailScreen = () => {
@@ -253,7 +252,14 @@ const OrderDetailScreen = () => {
           {order.items.map((item, index) => (
             <View key={index} className="flex-row mb-4 pb-4 border-b border-gray-200">
               <Image
-                source={{ uri: formatImageUrl(item.productImage) }}
+                source={{ 
+                  uri: getProductImage(
+                    item.productImage || '',
+                    item.category || '',
+                    item.productName,
+                    item.productId
+                  )
+                }}
                 className="w-16 h-16 rounded-lg"
                 resizeMode="cover"
               />
@@ -318,6 +324,7 @@ const OrderDetailScreen = () => {
                     productId: item.productId,
                     productName: item.productName,
                     productImage: item.productImage,
+                    category: item.category || '',
                   });
                 }
               }}
