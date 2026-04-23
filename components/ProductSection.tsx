@@ -76,13 +76,14 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ title, products,
                   {stripHtmlTags(product.description)}
                 </Text>
                 <View className="flex-row items-center mb-2">
-                  <MaterialCommunityIcons name="tag" size={14} color="#16a34a" />
-                  <Text className="text-xs text-green-700 font-semibold ml-1">
-                    {product.originalPrice && product.discountPercentage ? 
-                      `Giảm ${(product.originalPrice - product.price).toLocaleString('vi-VN')}đ` :
-                      `Giá tốt ${product.price.toLocaleString('vi-VN')}đ`
-                    }
+                  <Text className="text-base font-bold text-red-600">
+                    {product.price?.toLocaleString('vi-VN')}đ
                   </Text>
+                  {product.originalPrice && product.originalPrice > product.price ? (
+                    <Text className="text-xs text-gray-400 line-through ml-2">
+                      {product.originalPrice.toLocaleString('vi-VN')}đ
+                    </Text>
+                  ) : null}
                 </View>
               </View>
               {/* Button always at bottom */}

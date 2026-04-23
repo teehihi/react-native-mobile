@@ -40,6 +40,15 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
     ]);
   };
 
+  const loadAllDataExceptFlashSale = async () => {
+    await Promise.all([
+      loadProducts(),
+      loadCategories(),
+      loadBestSellers(),
+      loadDiscountedProducts(),
+    ]);
+  };
+
   const loadProducts = async () => {
     try {
       const response = await ApiService.getProducts({ limit: 12 });
@@ -121,7 +130,7 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    loadAllData().finally(() => setRefreshing(false));
+    loadAllDataExceptFlashSale().finally(() => setRefreshing(false));
   }, []);
 
   const handleSearchSubmit = (query: string) => {
@@ -171,6 +180,7 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
               products={flashSaleProducts.length > 0 ? flashSaleProducts : discountedProducts}
               endTime={flashSaleEndTime}
               onProductPress={handleProductPress}
+              onExpire={loadFlashSale}
             />
             <BestSellersSection 
               products={bestSellers}

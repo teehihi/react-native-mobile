@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, Image, TouchableOpacity, ScrollView, Dimensions,
 } from 'react-native';
@@ -6,16 +6,28 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Product } from '../types/api';
 import { getProductImage } from '../services/api';
 
+const BG_FLASH_SALE = require('../assets/bgFlashSale.png');
+
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = 150;
 
-function useCountdownFromEndTime(endTime: string | null) {
+function useCountdownFromEndTime(endTime: string | null, onExpire?: () => void) {
   const calc = () => endTime ? Math.max(0, Math.floor((new Date(endTime).getTime() - Date.now()) / 1000)) : 0;
   const [remaining, setRemaining] = useState(calc);
+  const expiredRef = React.useRef(false);
 
   useEffect(() => {
+    expiredRef.current = false;
     setRemaining(calc());
-    const id = setInterval(() => setRemaining(calc()), 1000);
+    const id = setInterval(() => {
+      const r = calc();
+      setRemaining(r);
+      if (r === 0 && !expiredRef.current) {
+        expiredRef.current = true;
+        // Đợi 1s rồi gọi onExpire để backend kịp tạo slot mới
+        setTimeout(() => onExpire?.(), 1000);
+      }
+    }, 1000);
     return () => clearInterval(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endTime]);
@@ -43,10 +55,11 @@ interface Props {
   products: Product[];
   endTime: string | null;
   onProductPress?: (product: Product) => void;
+  onExpire?: () => void;
 }
 
-export const FlashSaleSection: React.FC<Props> = ({ products, endTime, onProductPress }) => {
-  const { h, m, s } = useCountdownFromEndTime(endTime);
+export const FlashSaleSection: React.FC<Props> = ({ products, endTime, onProductPress, onExpire }) => {
+  const { h, m, s } = useCountdownFromEndTime(endTime, onExpire);
   const flashProducts = products;
 
   const formatPrice = (price: number) =>
@@ -64,7 +77,7 @@ export const FlashSaleSection: React.FC<Props> = ({ products, endTime, onProduct
       {/* ── Header image ── */}
       <View style={{ borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' }}>
         <Image
-          source={require('../assets/bgFlashSale.png')}
+          source={BG_FLASH_SALE}
           style={{ width: headerWidth, height: headerHeight }}
           resizeMode="contain"
         />
@@ -103,9 +116,9 @@ export const FlashSaleSection: React.FC<Props> = ({ products, endTime, onProduct
         contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 12 }}
         style={{ marginTop: -OVERLAP, paddingTop: 0 }}
       >
-        {flashProducts.slice(0, 6).map(item => (
+        {flashProducts.slice(0, 6).map((item, index) => (
           <TouchableOpacity
-            key={item.id}
+            key={`flash-${item.id}-${index}`}
             onPress={() => onProductPress?.(item)}
             activeOpacity={0.9}
             style={{

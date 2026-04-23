@@ -117,7 +117,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, styl
             )}
             {/* Current Price */}
             <Text className="text-lg font-bold text-red-600">
-              {formatPrice(product.price)}
+              {product.price ? formatPrice(product.price) : '---'}
             </Text>
           </View>
           
