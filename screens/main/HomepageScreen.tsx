@@ -9,8 +9,8 @@ import { HomepageHeader } from '../../components/HomepageHeader';
 import { CategorySlider } from '../../components/CategorySlider';
 import { BestSellersSection } from '../../components/BestSellersSection';
 import { ProductSection } from '../../components/ProductSection';
-import { PromoBanner } from '../../components/PromoBanner';
 import { DiscountedProductsSection } from '../../components/DiscountedProductsSection';
+import { FlashSaleSection } from '../../components/FlashSaleSection';
 import { CategoryModal } from '../../components/CategoryModal';
 
 interface HomepageScreenProps extends NavigationProps {}
@@ -22,6 +22,8 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
   const [discountedProducts, setDiscountedProducts] = useState<Product[]>([]);
+  const [flashSaleProducts, setFlashSaleProducts] = useState<Product[]>([]);
+  const [flashSaleEndTime, setFlashSaleEndTime] = useState<string | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,8 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
       loadProducts(),
       loadCategories(),
       loadBestSellers(),
-      loadDiscountedProducts()
+      loadDiscountedProducts(),
+      loadFlashSale(),
     ]);
   };
 
@@ -88,7 +91,6 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
   const loadDiscountedProducts = async () => {
     try {
       const response = await ApiService.getDiscountedProducts(20);
-      
       if (response.success && response.data) {
         setDiscountedProducts(response.data || []);
       } else {
@@ -98,6 +100,22 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
     } catch (error: any) {
       console.error('❌ Discounted products error:', error?.message || 'Network error');
       setDiscountedProducts([]);
+    }
+  };
+
+  const loadFlashSale = async () => {
+    try {
+      const response = await ApiService.getFlashSale();
+      if (response.success && response.data) {
+        setFlashSaleProducts(response.data.products || []);
+        setFlashSaleEndTime(response.data.endTime);
+      } else {
+        setFlashSaleProducts([]);
+        setFlashSaleEndTime(null);
+      }
+    } catch (error: any) {
+      console.error('❌ Flash sale error:', error?.message);
+      setFlashSaleProducts([]);
     }
   };
 
@@ -149,7 +167,11 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
               onCategoryPress={handleCategoryPress}
               onViewAllPress={handleViewAllCategories}
             />
-            <PromoBanner />
+            <FlashSaleSection
+              products={flashSaleProducts.length > 0 ? flashSaleProducts : discountedProducts}
+              endTime={flashSaleEndTime}
+              onProductPress={handleProductPress}
+            />
             <BestSellersSection 
               products={bestSellers}
               onProductPress={handleProductPress}

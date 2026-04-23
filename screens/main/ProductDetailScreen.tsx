@@ -24,6 +24,10 @@ interface Props {
 const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { product: initialProduct } = route.params;
   const { addItem } = useCartStore();
+  // Giữ lại flash sale price nếu có (price từ flash sale khác price gốc)
+  const flashSalePrice = initialProduct.originalPrice && initialProduct.price < initialProduct.originalPrice
+    ? initialProduct.price
+    : null;
   const [product, setProduct] = useState<ApiProduct>(initialProduct);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -81,7 +85,16 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       const res = await ApiService.getProductById(product.id);
       if (res.success && res.data) {
         console.log('✅ Loaded product detail with images:', res.data.images?.length || 0);
-        setProduct(res.data);
+        // Nếu đến từ flash sale, giữ lại giá sale
+        if (flashSalePrice !== null) {
+          setProduct({
+            ...res.data,
+            price: flashSalePrice,
+            originalPrice: res.data.price, // giá gốc từ DB
+          });
+        } else {
+          setProduct(res.data);
+        }
       }
     } catch (error) {
       console.error('❌ Failed to load product detail:', error);

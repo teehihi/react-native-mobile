@@ -887,6 +887,16 @@ export class ApiService {
     }
   }
 
+  static async getFlashSale(): Promise<ApiResponse<{ slotHour: number; endTime: string; remainingSeconds: number; products: Product[] } | null>> {
+    try {
+      const response = await apiClient.get('/products/flash-sale');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) return error.response.data;
+      return { success: false, message: 'Lỗi kết nối mạng.' };
+    }
+  }
+
   // --- Order APIs ---
 
   // Create new order
