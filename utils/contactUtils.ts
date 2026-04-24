@@ -14,11 +14,8 @@ export const contactSeller = async (type: 'zalo' | 'facebook' | 'messenger', inf
       url = `https://zalo.me/${info}`;
       break;
     case 'facebook':
-      // Mở app Facebook tới trang cá nhân
-      // info ở đây là ID người dùng hoặc username
-      url = Platform.OS === 'ios' 
-        ? `fb://profile/${info}` 
-        : `fb://facewebmodal/f?href=https://www.facebook.com/${info}`;
+      // Mở app Facebook tới trang cá nhân bằng ID số (chuẩn nhất)
+      url = `fb://profile/${info}`;
       break;
     case 'messenger':
       // Mở Messenger chat trực tiếp

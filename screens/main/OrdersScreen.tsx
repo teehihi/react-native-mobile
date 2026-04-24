@@ -378,7 +378,7 @@ const OrdersScreen = () => {
                 paddingVertical: 11,
                 alignItems: 'center',
               }}
-              onPress={() => contactSeller('facebook', 'nhatthien.nguyen.566')}
+              onPress={() => contactSeller('facebook', '100013674606987')}
             >
               <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Liên hệ</Text>
             </TouchableOpacity>
